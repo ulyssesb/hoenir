@@ -53,37 +53,37 @@ class GameDescriptionLanguage < Racc::Parser
       when nil
         case
         when (text = ss.scan(/or\s+/))
-           @rex_tokens.push action {[:OR,    text]}
+           @rex_tokens.push action {[:OR,    text.strip]}
 
         when (text = ss.scan(/role\s+/))
-           @rex_tokens.push action {[:ROLE,  text]}
+           @rex_tokens.push action {[:ROLE,  text.strip]}
 
         when (text = ss.scan(/init\s+/))
-           @rex_tokens.push action {[:INIT,  text]}
+           @rex_tokens.push action {[:INIT,  text.strip]}
 
         when (text = ss.scan(/true\s+/))
-           @rex_tokens.push action {[:TRUE,  text]}
+           @rex_tokens.push action {[:TRUE,  text.strip]}
 
         when (text = ss.scan(/does\s+/))
-           @rex_tokens.push action {[:DOES,  text]}
+           @rex_tokens.push action {[:DOES,  text.strip]}
 
         when (text = ss.scan(/next\s+/))
-           @rex_tokens.push action {[:NEXT,  text]}
+           @rex_tokens.push action {[:NEXT,  text.strip]}
 
         when (text = ss.scan(/legal\s+/))
-           @rex_tokens.push action {[:LEGAL, text]}
+           @rex_tokens.push action {[:LEGAL, text.strip]}
 
         when (text = ss.scan(/goal\s+/))
-           @rex_tokens.push action {[:GOAL,  text]}
+           @rex_tokens.push action {[:GOAL,  text.strip]}
 
         when (text = ss.scan(/not\s+/))
-           @rex_tokens.push action {[:NOT,   text]}
+           @rex_tokens.push action {[:NOT,   text.strip]}
 
         when (text = ss.scan(/terminal\s+/))
-           @rex_tokens.push action {[:TERMINAL, text]}
+           @rex_tokens.push action {[:TERMINAL, text.strip]}
 
         when (text = ss.scan(/distinct\s+/))
-           @rex_tokens.push action {[:DIST, text]}
+           @rex_tokens.push action {[:DIST,     text.strip]}
 
         when (text = ss.scan(/<=/))
            @rex_tokens.push action {[:RELATION, text]}

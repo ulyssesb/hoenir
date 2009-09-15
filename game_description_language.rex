@@ -3,17 +3,17 @@ macro
     AXIOM [[:alnum:]\?\+\-\_\#\|\<\>]+
     BLANK \s+
 rule
-    or{BLANK}       {[:OR,    text]}    
-    role{BLANK}     {[:ROLE,  text]}    
-    init{BLANK}     {[:INIT,  text]}    
-    true{BLANK}     {[:TRUE,  text]}    
-    does{BLANK}     {[:DOES,  text]}    
-    next{BLANK}     {[:NEXT,  text]}    
-    legal{BLANK}    {[:LEGAL, text]}    
-    goal{BLANK}     {[:GOAL,  text]}    
-    not{BLANK}      {[:NOT,   text]}    
-    terminal{BLANK} {[:TERMINAL, text]}    
-    distinct{BLANK} {[:DIST, text]}    
+    or{BLANK}       {[:OR,    text.strip]}    
+    role{BLANK}     {[:ROLE,  text.strip]}    
+    init{BLANK}     {[:INIT,  text.strip]}    
+    true{BLANK}     {[:TRUE,  text.strip]}    
+    does{BLANK}     {[:DOES,  text.strip]}    
+    next{BLANK}     {[:NEXT,  text.strip]}    
+    legal{BLANK}    {[:LEGAL, text.strip]}    
+    goal{BLANK}     {[:GOAL,  text.strip]}    
+    not{BLANK}      {[:NOT,   text.strip]}    
+    terminal{BLANK} {[:TERMINAL, text.strip]}    
+    distinct{BLANK} {[:DIST,     text.strip]}    
     
     <= {[:RELATION, text]}
     \( {[:OP, text]}

@@ -14,14 +14,14 @@ require "#{File.dirname(__FILE__)}/logic.rb"
 
 class GameDescriptionLanguage < Racc::Parser
 
-module_eval <<'..end game_description_language.y modeval..idd39ee77aac', 'game_description_language.y', 67
+module_eval <<'..end game_description_language.y modeval..id70da7c5320', 'game_description_language.y', 67
 def parse( str, debugger )
     @yydebug=debugger
     scan_evaluate( str )
     return do_parse
 end
 
-..end game_description_language.y modeval..idd39ee77aac
+..end game_description_language.y modeval..id70da7c5320
 
 ##### racc 1.4.5 generates ###
 
