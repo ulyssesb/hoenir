@@ -12,7 +12,7 @@ class GameDescriptionLanguage
         roles: role       { result = val[0] } | 
                roles role { result = [val[0], val[1]].flatten }
         role:  OP ROLE ATOM CP 
-                          { result = Term.new(:role, [Term.new(val[2])]) }
+                          { result = Term.new(val[1], [Term.new(val[2])]) }
         
         
         inits: init       { result = val[0] } |
@@ -31,9 +31,9 @@ class GameDescriptionLanguage
         
         
         relation: RELATION rel_head rel_body 
-                      { result = Predicate.new(val[1].name, val[1].args, val[2]) } |
+                  {result = Predicate.new(val[1].name.to_s, val[1].args, val[2])} |
                   RELATION rel_head 
-                      { result = Predicate.new(val[1].name, [], val[2]) }
+                  { result = Predicate.new(val[1].name, [], val[2]) }
         rel_head: OP NEXT arg_list CP  { result = Term.new(val[1], val[2]) } |
                   term                 { result = val[0] }
         rel_body: term                 { result = [val[0]] } |

@@ -14,14 +14,14 @@ require "#{File.dirname(__FILE__)}/logic.rb"
 
 class GameDescriptionLanguage < Racc::Parser
 
-module_eval <<'..end game_description_language.y modeval..id70da7c5320', 'game_description_language.y', 67
+module_eval <<'..end game_description_language.y modeval..ida1b010326f', 'game_description_language.y', 67
 def parse( str, debugger )
     @yydebug=debugger
     scan_evaluate( str )
     return do_parse
 end
 
-..end game_description_language.y modeval..id70da7c5320
+..end game_description_language.y modeval..ida1b010326f
 
 ##### racc 1.4.5 generates ###
 
@@ -258,7 +258,7 @@ module_eval <<'.,.,', 'game_description_language.y', 12
 
 module_eval <<'.,.,', 'game_description_language.y', 14
   def _reduce_5( val, _values, result )
- result = Term.new(:role, [Term.new(val[2])])
+ result = Term.new(val[1], [Term.new(val[2])])
    result
   end
 .,.,
@@ -328,7 +328,7 @@ module_eval <<'.,.,', 'game_description_language.y', 29
 
 module_eval <<'.,.,', 'game_description_language.y', 33
   def _reduce_15( val, _values, result )
- result = Predicate.new(val[1].name, val[1].args, val[2])
+result = Predicate.new(val[1].name.to_s, val[1].args, val[2])
    result
   end
 .,.,

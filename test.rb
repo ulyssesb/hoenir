@@ -7,4 +7,7 @@ gdl_file = File.open(ARGV[0])
 gdl_parser = GameDescriptionLanguage.new
 
 x = gdl_parser.parse(gdl_file.read, debugger)
-x.each { |i| puts i.to_pl}
+prolog_string = x.collect { |i| i.to_pl}
+prolog_string.map!{ |i| i << '.' }
+
+puts prolog_string
