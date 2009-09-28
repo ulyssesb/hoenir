@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-require 'game_description_language.tab.rb'
+require 'gdl_parser.tab.rb'
 
 debugger = ARGV[1] == "true" ? true : false 
 

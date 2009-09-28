@@ -60,8 +60,8 @@ end
 
 ---- header
 
-require "#{File.dirname(__FILE__)}/game_description_language.rex"
-require "#{File.dirname(__FILE__)}/logic.rb"
+require "#{File.dirname(__FILE__)}/gdl_scanner.rex"
+require "#{File.dirname(__FILE__)}/gdl_classes.rb"
 
 ---- inner
 def parse( str, debugger )
