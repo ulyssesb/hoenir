@@ -38,7 +38,8 @@ class GameDescription
 
   # Gera a string com os predicados e as declarações (sem os inits)
   def to_pl
-    string = [@statements, @predicates, @nexts, @goals, @terminals].map do |item|
+    string = [@players, @statements, @predicates, @nexts, @goals, @terminals].map do 
+      |item|
       item.map{|term| term.to_pl }
     end
     string.map!{ |i| i.map!{ |term| term << '.'}}
