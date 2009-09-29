@@ -1,38 +1,46 @@
-
-
+# -*- coding: utf-8 -*-
 class Term
-  attr_accessor :name, :args
+  attr_accessor :name, :params
 
-  def initialize(name, args=[])
-    @name = name.index("?") == 0 ? name.gsub(/^\?/,'').upcase.to_sym : name.to_sym
-    @args = args.nil?? [] : args
+  def initialize(name, params=[])
+    if not name.is_a? Symbol
+      @name = name.index("?") == 0 ? name.gsub(/^\?/,'').upcase.to_sym : name.to_sym
+    else
+      @name = name
+    end
+    @params = params.nil?? [] : params
   end
 
   def arity
-    @args.size
+    @params.size
   end
 
   def is_atom?
-    (@args.empty?) ? true : false
+    (@params.empty?) ? true : false
   end
 
   def is_var?
     @name.to_s == @name.to_s.upcase ? true : false
   end
 
-  def to_pl
-    if self.is_atom? and not self.is_var?
-      return "\'#{@name.to_s}\'"
-    elsif self.is_atom?
-      return @name.to_s
+  def to_pl(values_hash=nil)
+    return @name.to_s if self.is_atom?
+
+    # Caso seja uma variável e tenha alguma valoração possivel, imprime-a
+    if not values_hash.nil? and not values_hash[@name].nil and self.is_var?
+      return values_hash[@name]
     end
 
+    # OR(foo, bar) -> (foo;bar)
+    return "(#{params[0].to_pl};#{params[1].to_pl})" if @name == :or
+
     # Prolog nao aceita declaracoes true(foo BAR)
-    string = @name.to_s == "true"?  "" : "#{@name.to_s}(" 
-    @args.each do |arg| 
-      arg_pl = (@args.index(arg)+1) == @args.size ? 
-               arg.to_pl : arg.to_pl + ", "
-      string << arg_pl
+    string = @name == :true ?  "" : "#{@name.to_s}(" 
+
+    @params.each do |param| 
+      param_pl = (@params.index(param)+1) == @params.size ? 
+               param.to_pl(values_hash) : param.to_pl(values_hash) + ", "
+      string << param_pl
     end
     string.concat ")" unless @name.to_s == "true"
     string
@@ -43,28 +51,29 @@ end
 class Predicate < Term
   attr_accessor :rules
 
-  def initialize(name, args=[], rules=[])
-    super(name, args)
+  def initialize(name, params=[], rules=[])
+    super(name, params)
     @rules = rules
   end
 
-  def to_pl
-    string = args.empty?? "#{@name.to_s}" : "#{@name.to_s}("
+  def to_pl(values_hash=nil)
+    string = params.empty?? "#{@name.to_s}" : "#{@name.to_s}("
 
-    @args.each do |arg| 
-      arg_pl = (@args.index(arg)+1) == @args.size ? 
-               arg.to_pl : arg.to_pl + ", "
-      string << arg_pl
+    @params.each do |param| 
+      param_pl = (@params.index(param)+1) == @params.size ? 
+               param.to_pl(values_hash) : param.to_pl(values_hash) + ", "
+      string << param_pl
     end
-    string.concat ")" unless args.empty?
+    string.concat ")" unless params.empty?
     string << ":-\n"
 
-    @rules.each do |arg| 
-      arg_pl = (@rules.index(arg)+1) == @rules.size ? 
-               "\t" + arg.to_pl : "\t" + arg.to_pl + ",\n"
-      string << arg_pl
+    @rules.each do |param| 
+      param_pl = (@rules.index(param)+1) == @rules.size ? 
+               "\t" + param.to_pl(values_hash) : "\t" + param.to_pl(values_hash) + ",\n"
+      string << param_pl
     end
 
     string
   end
-end  
+end
+

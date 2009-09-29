@@ -1,13 +1,16 @@
 #!/usr/bin/ruby
 require 'gdl_parser.tab.rb'
+require 'ggp_classes'
 
 debugger = ARGV[1] == "true" ? true : false 
 
 gdl_file = File.open(ARGV[0])
 gdl_parser = GameDescriptionLanguage.new
 
-x = gdl_parser.parse(gdl_file.read, debugger)
-prolog_string = x.collect { |i| i.to_pl}
-prolog_string.map!{ |i| i << '.' }
+description = gdl_parser.parse(gdl_file.read, debugger)
 
-puts prolog_string
+game = GameDescription.new(description)
+
+pl_file = File.new('game_description.yap', "w+")
+pl_file << game.to_pl
+pl_file.close

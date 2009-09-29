@@ -13,7 +13,7 @@ end
 task :clean do
   `rm -rf gdl_scanner.rex.rb`
   `rm -rf gdl_parser.tab.rb`
-  `rm -rf gd_prolog.yap`
+  `rm -rf game_description.yap`
 
   `rm -rf *~ \#*`
 end
