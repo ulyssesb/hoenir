@@ -3,13 +3,14 @@ require 'gdl_classes'
 
 class GameDescription
   attr_accessor :statements, :inits, :goals, :predicates
-  attr_accessor :nexts, :terminals, :players
+  attr_accessor :nexts, :terminals, :players, :legals
 
   def initialize(description)
     @statements = []
     @predicates = []
     @terminals = []
     @players = []
+    @legals = []
     @inits = []
     @goals = []
     @nexts = []
@@ -26,6 +27,8 @@ class GameDescription
         @terminals << term
       when :role
         @players << term
+      when :legal 
+        @legals << term
       else 
         if term.is_a? Predicate
           @predicates << term
@@ -46,4 +49,20 @@ class GameDescription
     string.join "\n"
   end
   
+end
+
+
+class GameTurn
+  attr_accessor :game_state, :prolog
+
+  def initialize(statements, prolog)
+    @game_state = statements
+    @prolog = prolog
+  end
+
+  def legal_moves(legals)
+    legals.each do |move|
+      puts move.to_pl
+    end
+  end
 end

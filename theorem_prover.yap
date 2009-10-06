@@ -24,21 +24,38 @@ get_vars(Predicate, VarList):-
     Predicate=..PredicateList,
     get_vars(PredicateList, VarList).
 
+% Fecha o socket se receber um 'end_of_file'
+term_evaluate(Term, Sin):-
+    Term=end_of_file,
+    socket_close(Sin).
 
 % Avalia o Term e escreve no socket o valor das variáves
 term_evaluate(Term, Sin):-
     not(ground(Term)),
     get_vars(Term, Vars),
     setof(Vars, Term, Solution),
-    write(Sin, Solution).
+    write(Sin, Solution),
+    write(Sin, '\n').
 
 % Chama o predicado
 term_evaluate(Term, Sin):-
     call(Term),
-    write('+ '), 
-    write(Term), nl.
-    
+    write(Sin, 'true'),
+    write(Sin, '\n'),
 
+    write('YAP::true('), 
+    write(Term),
+    write(')'), nl.
+
+% Caso alguma coisa de errado...
+term_evaluate(Term, Sin):-
+    not(call(Term)),
+    write(Sin, 'false'),
+    write(Sin, '\n'),
+    write('YAP::false('),
+    write(Term),
+    write(')'), nl.
+    
 %%
 %% Programa principal
 %%
@@ -46,18 +63,24 @@ term_evaluate(Term, Sin):-
 :- initialization(go).
 
 go:-
-    consult('game_description.yap').
-%%     socket('AF_INET',Sock),
-%%     socket_bind(Sock,'AF_INET'(_,43210)),
-%%     socket_listen(Sock,5),
-%%     socket_accept(Sock,Sin),    
-%%     main_loop(Sin).
+    consult('game_description.yap'),
+    socket('AF_INET',Sock),
+    socket_bind(Sock,'AF_INET'(_,43210)),
+    socket_listen(Sock,5),
+    socket_accept(Sock,Sin),    
+    main_loop(Sock, Sin).
 
    
-%% main_loop(Sin):-
-%%     write('Sock - OK. Lendo entrada...\n'),
-%%     read(Sin, Term),
-%%     write('Entrada - OK. term_evaluate\n'),
-%%     term_evaluate(Term, Sin),
-%%     write('Goto main_loop\n'),
-%%     main_loop(Sin).
+main_loop(Sock, Sin):-
+    not(is_stream(Sin)),
+    write('Cloased Socket... Exiting\n'),
+    socket_close(Sock).
+
+main_loop(Sock, Sin):-
+    write('YAP::Sock ..... OK. Lendo entrada\n'),
+    read(Sin, Term),
+    write('YAP::Entrada .. OK. Term Evaluate: '),
+    write(Term), nl,
+    term_evaluate(Term, Sin),
+    write('YAP::Goto main_loop\n'),
+    main_loop(Sock, Sin).

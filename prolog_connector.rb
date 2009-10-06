@@ -37,7 +37,7 @@ class PrologConnector
   
   @@hostname = 'localhost'
   @@port = '43210'
-  @socket
+  @socket = nil
 
 
   private
@@ -45,7 +45,6 @@ class PrologConnector
     # Faz um fork (threads nao estavam funcionando) para o prolog
     fork { YapProlog.new.start }
 
-    # Espera até que o prolog tenha subido
     sleep(1)
     @socket = TCPSocket.open(@@hostname, @@port) rescue nil
     @status = @socket.nil?? :disconneted : :connected
@@ -85,5 +84,10 @@ class PrologConnector
     else 
       return nil
     end
+  end
+
+  def close
+    @status = :disconnected
+    @socket.close unless @socket.nil?
   end
 end
