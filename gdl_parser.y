@@ -31,9 +31,9 @@ class GameDescriptionLanguage
         
         
         relation: RELATION rel_head rel_body 
-                  {result = Predicate.new(val[1].name.to_s, val[1].params, val[2])} |
+                  { result = Predicate.new(val[1], val[2]) } |
                   RELATION rel_head 
-                  { result = Predicate.new(val[1].name, [], val[2]) }
+                  { result = Predicate.new(val[1]) }
         rel_head: OP NEXT param_list CP  { result = Term.new(val[1], val[2]) } |
                   term                 { result = val[0] }
         rel_body: term                 { result = [val[0]] } |
