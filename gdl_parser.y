@@ -52,7 +52,7 @@ class GameDescriptionLanguage
               OP GOAL  param_list CP { result = Term.new(val[1], val[2]) } |
               OP DIST  param_list CP { result = Term.new(val[1], val[2]) } |
               OP ATOM  param_list CP { result = Term.new(val[1], val[2]) } |
-              TERMINAL             { result = Term.new(val[0], val[1]) } |
+              TERMINAL             { result = Term.new(val[0]) } |
               ATOM                 { result = Term.new(val[0]) }
         
         
