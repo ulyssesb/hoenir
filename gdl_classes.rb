@@ -116,15 +116,20 @@ class Predicate < Term
     @rules = rules
   end
 
-  def to_pl
-    string = params.empty?? "#{@name.to_s}" : "#{@name.to_s}("
-
+  # Imprime o cabeçalho do predicado
+  def head
+    string = @params.empty?? "#{@name.to_s}" : "#{@name.to_s}("
     @params.each do |param| 
       param_pl = (@params.index(param)+1) == @params.size ? 
-               param.to_pl : param.to_pl + ", "
+                                param.to_pl : param.to_pl + ", "
       string << param_pl
     end
-    string.concat ")" unless params.empty?
+    string.concat ")" unless @params.empty?
+    string
+  end
+
+  def to_pl
+    string = self.head || ""
     string << ":-\n"
 
     @rules.each do |param| 

@@ -29,6 +29,15 @@ term_evaluate(Term, Sin):-
     Term=end_of_file,
     socket_close(Sin).
 
+% Caso alguma coisa de errado...
+term_evaluate(Term, Sin):-
+    not(call(Term)),
+    write(Sin, 'false'),
+    write(Sin, '\n'),
+    write('YAP::false('),
+    write(Term),
+    write(')'), nl.
+
 % Avalia o Term e escreve no socket o valor das variáves
 term_evaluate(Term, Sin):-
     not(ground(Term)),
@@ -47,14 +56,6 @@ term_evaluate(Term, Sin):-
     write(Term),
     write(')'), nl.
 
-% Caso alguma coisa de errado...
-term_evaluate(Term, Sin):-
-    not(call(Term)),
-    write(Sin, 'false'),
-    write(Sin, '\n'),
-    write('YAP::false('),
-    write(Term),
-    write(')'), nl.
     
 %%
 %% Programa principal

@@ -5,7 +5,8 @@ require 'prolog_connector'
 
 debugger = ARGV[1] == "true" ? true : false 
 
-gdl_file = File.open(ARGV[0])
+gdl_file = File.open(ARGV[0]) rescue nil
+gdl_file ||= File.open 'sample_games/tictactoe.kif'
 gdl_parser = GameDescriptionLanguage.new
 
 description = gdl_parser.parse(gdl_file.read, debugger)
@@ -17,12 +18,14 @@ pl_file << game.to_pl
 pl_file.close
 
 prolog = PrologConnector.new
-game_turn = GameTurn.new(game.statements, prolog)
+game_turn = GameTurn.new(game.inits, prolog)
 game_turn.legal_moves(game.legals)
+
+
 
 #puts "HOANIR:: Enviando mensagens"
 #puts prolog.send('role(X).')
 #puts prolog.send('goal(X, Y).')
 #puts "HOANIR:: Fim do envio"
-
-prolog.close
+#sleep(30)
+#prolog.close
