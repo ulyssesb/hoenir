@@ -53,15 +53,16 @@ class PrologConnector
   # Transforma a mensagem recebida em um array, ou booleano
   def parser_message(message)
     # Retira o "\n" enviado
-    message.gsub "\n", ""
-    
+    message.gsub! "\n", ""
+
     case message
     when 'true'
       return true
     when 'false'
       return false
     else
-      return message.scan /\w+/
+      # eval para transformar a string em um array
+      return eval(message.gsub(/(\w+?)/, "'\\1'"))
     end
   end
 

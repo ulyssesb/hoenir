@@ -77,14 +77,29 @@ class GameTurn
     @prolog = prolog
   end
 
+  ## Calcula quais jogadas são passíveis
   def legal_moves(legals)
+    
+    # Envia para o prolog o estado atual do jogo
     assert_statements
-    legals.each do |move|
+
+    legal_moves = legals.collect do |move|
       move_statement =  move.head + "." + "\n"
-      puts "> " + move_statement
       unified = prolog.send(move_statement)
-      print "< " 
-      puts unified
+      
+      partial_moves = []
+      # A declaração retornou verdadeira, é uma jogada válida
+      if unified.is_a? TrueClass
+        partial_moves << Term.new(move.name, move.params)
+      # Se não retornou falso é um vetor com as valorações
+      elsif not unified.is_a? FalseClass
+        partial_moves = move.val_array_parser unified
+      end
+      partial_moves
     end
+    
+    # Retira o estado atual
+    retract_statements
+    return legal_moves.flatten.compact
   end
 end

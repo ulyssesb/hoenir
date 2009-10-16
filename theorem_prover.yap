@@ -43,6 +43,9 @@ term_evaluate(Term, Sin):-
     not(ground(Term)),
     get_vars(Term, Vars),
     setof(Vars, Term, Solution),
+    write('YAP::evaluated => '),
+    write(Solution),
+    write(' % '), nl,
     write(Sin, Solution),
     write(Sin, '\n').
 

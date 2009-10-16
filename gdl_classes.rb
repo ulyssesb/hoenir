@@ -81,11 +81,8 @@ class Term
   # vetor é uma possivel valoração para as variáves do termo
   # Retorna os termos instanciados com as _n_ valorações possíveis
   def val_array_parser(val_array)
-    vars = @params.vars
+    vars = self.vars
 
-    # Verifica se as variáveis estão em mesmo número que as valorações
-    return nil if vars.size != val_array.size
-  
     # Transforma o array 
     # [[valA1, valB1], [valA2, valB2]] em 
     # [[valA1, valA2], [valB1, valB2]] 
