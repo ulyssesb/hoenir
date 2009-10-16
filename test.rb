@@ -12,6 +12,7 @@ gdl_parser = GameDescriptionLanguage.new
 description = gdl_parser.parse(gdl_file.read, debugger)
 
 game = GameDescription.new(description)
+debugger
 
 pl_file = File.new('game_description.yap', "w+")
 pl_file << game.to_pl
@@ -19,13 +20,10 @@ pl_file.close
 
 prolog = PrologConnector.new
 game_turn = GameTurn.new(game.inits, prolog)
-game_turn.legal_moves(game.legals)
+
+legals = game_turn.legal_moves(game.legals)
+legals.each { |move| puts move.to_pl }
 
 
 
-#puts "HOANIR:: Enviando mensagens"
-#puts prolog.send('role(X).')
-#puts prolog.send('goal(X, Y).')
-#puts "HOANIR:: Fim do envio"
-#sleep(30)
-#prolog.close
+prolog.close

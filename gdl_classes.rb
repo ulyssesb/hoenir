@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 class Term
+  ## Palavras reservadas do prolog
+  @@pl_tokens = [:succ, :table]
+
   attr_accessor :name, :params
 
   def initialize(name, params=[])
@@ -10,6 +13,11 @@ class Term
     else 
       return nil
     end
+    
+    # Tratamento para as palavras reservadas do prolog
+    # :token => :token__
+    @name = ("%s__" % @name).to_sym if @@pl_tokens.include? @name
+    
     @params = params.nil?? [] : params
   end
 
@@ -127,14 +135,15 @@ class Predicate < Term
 
   def to_pl
     string = self.head || ""
-    string << ":-\n"
+    unless @rules.empty?
+      string << ":-\n"
 
-    @rules.each do |param| 
-      param_pl = (@rules.index(param)+1) == @rules.size ? 
-               "\t" + param.to_pl : "\t" + param.to_pl + ",\n"
-      string << param_pl
+      @rules.each do |param| 
+        param_pl = (@rules.index(param)+1) == @rules.size ? 
+                    "\t" + param.to_pl : "\t" + param.to_pl + ",\n"
+        string << param_pl
+      end
     end
-
     string
   end
 end
