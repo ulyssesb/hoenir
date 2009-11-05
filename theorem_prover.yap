@@ -68,6 +68,7 @@ term_evaluate(Term, Sin):-
 
 go:-
     consult('game_description.yap'),
+    consult('gdl_prolog_settings'),
     socket('AF_INET',Sock),
     socket_bind(Sock,'AF_INET'(_,43210)),
     socket_listen(Sock,5),

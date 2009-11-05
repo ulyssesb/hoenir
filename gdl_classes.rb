@@ -36,9 +36,6 @@ class Term
   def to_pl
     return @name.to_s if self.is_atom?
 
-    # OR(foo, bar) -> (foo;bar)
-    return "(#{params[0].to_pl};#{params[1].to_pl})" if @name == :or
-
     # Prolog nao aceita declaracoes true(foo BAR)
     string = @name == :true ?  "" : "#{@name.to_s}(" 
 
