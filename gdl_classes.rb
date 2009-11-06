@@ -48,6 +48,18 @@ class Term
     string
   end
 
+  # Para realizar uma ação, e ser avaliada no cálculo do novo estado, o termo (que
+  # supostamente é uma ação) deve ser encapsulado por um  _does_
+  def generate_does
+    # <- legal(player, action)
+    # -> does(player, action)
+    if self.name == :legal
+      Term.new(:does, self.params)
+    else
+      Term.new(:does, [self]) 
+    end
+  end
+
   # Procura nos parametros todas as variáveis. Retorna um array
   def vars
     vars_list = @params.collect do |param|

@@ -57,18 +57,63 @@ class GameTurn
   attr_accessor :game_state, :prolog
 
   private
-  ## Insere o estado atual na base de fatos
-  def assert_statements
-    @game_state.each do |statement|
+  ## Insere fatos na base de conhecimento
+  def assert(statements)
+    # Não é um array
+    unless statements.is_a? Array
+      prolog.send("assert(" + statements.to_pl + ").\n")
+      return 
+    end
+
+    statements.each do |statement|
       prolog.send("assert(" + statement.to_pl + ").\n")
     end
   end
 
-  # Remove o estado atual
-  def retract_statements
-    @game_state.each do |statement|
+  ## Remove fatos
+  def retract(statements)
+    # Não é um array
+    unless statements.is_a? Array
+      prolog.send("retract(" + statements.to_pl + ").\n")
+      return 
+    end
+    
+    statements.each do |statement|
       prolog.send("retract(" + statement.to_pl + ").\n")
     end
+  end
+
+  ## Envia para o prolog uma coleção de cabeçalhos para serem provados
+  ## <- Array de Terms
+  ## -> Array com os Terms instanciados 
+  def proof_terms(terms_array)
+    # Envia para o prolog o estado atual do jogo
+    assert(@game_state)
+
+    true_facts = terms_array.collect do |term|
+      # Pega apenas o cabeçalho dos predicados
+      term_head = term.head + ".\n"
+
+      # Envia para o prolog e coleta a resposta
+      unified = prolog.send(term_head)
+      
+      collected_facts = []
+      if unified.is_a? TrueClass
+        # Não houve unificação, porém a declaração retornou verdadeiro
+        # Ex: pai(joao, jose) consta na base de fatos
+        collected_facts << Term.new(term.name, term.params)
+      elsif not unified.is_a? FalseClass
+        # Não retornou falso, houve uma unificação. Guarda o array retornado
+        collected_facts = term.val_array_parser(unified)
+      end
+      collected_facts
+    end
+
+    # Remove o estado atual
+    retract(@game_state)
+    
+    # Retorna tudo que foi aceito como verdadeiro no estado atual
+    return true_facts.flatten.compact
   end
 
   public
@@ -79,27 +124,21 @@ class GameTurn
 
   ## Calcula quais jogadas são passíveis
   def legal_moves(legals)
-    
-    # Envia para o prolog o estado atual do jogo
-    assert_statements
+    proof_terms(legals)
+  end
 
-    legal_moves = legals.collect do |move|
-      move_statement =  move.head + "." + "\n"
-      unified = prolog.send(move_statement)
-      
-      partial_moves = []
-      # A declaração retornou verdadeira, é uma jogada válida
-      if unified.is_a? TrueClass
-        partial_moves << Term.new(move.name, move.params)
-      # Se não retornou falso é um vetor com as valorações
-      elsif not unified.is_a? FalseClass
-        partial_moves = move.val_array_parser unified
-      end
-      partial_moves
-    end
+  ## Calcula qual será o próximo estado, dada uma ação
+  def next_state(nexts, action)
+    # Insere a ação no prolog
+    ## O método _generate_does_ cria um novo Term com o termo _does_ no cabeçalho
+    assert(action.generate_does)
+
+    # Cria um novo estado
+    new_game_state = GameTurn.new(proof_terms(nexts), @prolog)
     
-    # Retira o estado atual
-    retract_statements
-    return legal_moves.flatten.compact
+    # Remove a ação da base
+    retract(action.generate_does)
+
+    return new_game_state
   end
 end
