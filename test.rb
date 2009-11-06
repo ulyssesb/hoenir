@@ -20,7 +20,6 @@ pl_file.close
 
 prolog = PrologConnector.new
 game_turn = GameTurn.new(game.inits, prolog)
-debugger
 legals = game_turn.legal_moves(game.legals)
 legals.each { |move| puts move.to_pl }
 
