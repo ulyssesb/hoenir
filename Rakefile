@@ -14,6 +14,6 @@ task :clean do
   `rm -rf gdl_scanner.rex.rb`
   `rm -rf gdl_parser.tab.rb`
   `rm -rf game_description.yap`
-
+  `rm -rf *.log`
   `rm -rf *~ \#*`
 end
