@@ -141,4 +141,18 @@ class GameTurn
 
     return new_game_state
   end
+
+  ## Auto explicativa
+  def is_terminal?
+    # Cria um termo _Terminal_
+    terminal = Term.new(:terminal)
+
+    # Como o método sempre retorna um array, tira o valor verdade dele
+    answer = proof_terms(terminal)
+    if answer.size == 1
+      return answer.first
+    else 
+      return nil
+    end
+  end
 end
