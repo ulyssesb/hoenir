@@ -33,15 +33,35 @@ class Term
     @name.to_s == @name.to_s.upcase ? true : false
   end
 
+  ## Operador de igualdade
+  def == (other)
+#    debugger
+    return false if other.nil? or
+                    (not self.name == other.name) or 
+                    (not self.arity == other.arity)
+    self.params.each_with_index do |param, i| 
+      return false unless param == other.params[i]
+    end
+    return true
+  end
+
+  def eql? (other)
+    self == other
+  end
+
+  ## Para a operação uniq
+  def hash
+    self.to_pl.hash
+  end
+
   def to_pl
     return @name.to_s if self.is_atom?
 
     # Prolog nao aceita declaracoes true(foo BAR)
     string = @name == :true ?  "" : "#{@name.to_s}(" 
 
-    @params.each do |param| 
-      param_pl = (@params.index(param)+1) == @params.size ? 
-               param.to_pl : param.to_pl + ", "
+    @params.each_with_index do |param, index|
+      param_pl = (index+1) == @params.size ? param.to_pl : param.to_pl + ", "
       string << param_pl
     end
     string.concat ")" unless @name.to_s == "true"
@@ -59,6 +79,17 @@ class Term
       Term.new(:does, [self]) 
     end
   end
+
+  # Os estados gerados vem com o predicado 'next', que não pertencem ao estado
+  # do jogo. Ex.: next(cell(1,2,1)) -> cell(1,2,1)
+  def remove_next
+    if self.name == :next
+      Term.new(self.params.first.name, self.params.first.params)
+    else
+      self
+    end    
+  end
+
 
   # Procura nos parametros todas as variáveis. Retorna um array
   def vars
@@ -98,6 +129,8 @@ class Term
   # vetor é uma possivel valoração para as variáves do termo
   # Retorna os termos instanciados com as _n_ valorações possíveis
   def val_array_parser(val_array)
+    return nil if val_array.nil?
+
     vars = self.vars
 
     # Transforma o array 
@@ -124,18 +157,38 @@ class Predicate < Term
   def initialize(head, rules=[])
     if head.is_a? Term
       super(head.name, head.params)
-    else
-      super(name, params)
+    elsif head.is_a? String or head.is_a? Symbol
+      super(head)
     end
     @rules = rules
   end
 
+  ## Operador de igualdade
+  def == (other)
+    return false unless super(other)
+    return false unless self.rules.size == other.rules.size
+    self.rules.each_with_index do |rule, i| 
+      return false unless rule == other.rule[i]
+    end
+    return true
+  end
+
+  def eql?(other)
+    self == other
+  end
+
+  ## Para a operação uniq
+  def hash
+    # Apenas imprime o Termo
+    self.to_pl.hash
+  end
+
+
   # Imprime o cabeçalho do predicado
   def head
     string = @params.empty?? "#{@name.to_s}" : "#{@name.to_s}("
-    @params.each do |param| 
-      param_pl = (@params.index(param)+1) == @params.size ? 
-                                param.to_pl : param.to_pl + ", "
+    @params.each_with_index do |param, index| 
+      param_pl = (index+1) == @params.size ? param.to_pl : param.to_pl + ", "
       string << param_pl
     end
     string.concat ")" unless @params.empty?
@@ -147,8 +200,8 @@ class Predicate < Term
     unless @rules.empty?
       string << ":-\n"
 
-      @rules.each do |param| 
-        param_pl = (@rules.index(param)+1) == @rules.size ? 
+      @rules.each_with_index do |param, index| 
+        param_pl = (index+1) == @rules.size ? 
                     "\t" + param.to_pl : "\t" + param.to_pl + ",\n"
         string << param_pl
       end

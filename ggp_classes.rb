@@ -87,6 +87,9 @@ class GameTurn
   ## <- Array de Terms
   ## -> Array com os Terms instanciados 
   def proof_terms(terms_array)
+    # Garante que o parametro é um array
+    terms_array = [terms_array] unless terms_array.is_a? Array
+    
     # Envia para o prolog o estado atual do jogo
     assert(@game_state)
 
@@ -113,17 +116,20 @@ class GameTurn
     retract(@game_state)
     
     # Retorna tudo que foi aceito como verdadeiro no estado atual
-    return true_facts.flatten.compact
+    return true_facts.flatten.compact.uniq
   end
 
   public
   def initialize(statements, prolog)
-    @game_state = statements
+    # Os estados gerados vem com o predicado 'next', que não pertencem ao estado
+    # do jogo. Ex.: next(cell(1,2,1)) -> cell(1,2,1)
+    @game_state = statements.collect{ |state| state.remove_next }.flatten
     @prolog = prolog
   end
 
   ## Calcula quais jogadas são passíveis
   def legal_moves(legals)
+    # Chama o provador e retira os estados repetidos
     proof_terms(legals)
   end
 
@@ -134,7 +140,8 @@ class GameTurn
     assert(action.generate_does)
 
     # Cria um novo estado
-    new_game_state = GameTurn.new(proof_terms(nexts), @prolog)
+    new_states = proof_terms(nexts)
+    new_game_state = GameTurn.new(new_states, @prolog)
     
     # Remove a ação da base
     retract(action.generate_does)
@@ -145,12 +152,14 @@ class GameTurn
   ## Auto explicativa
   def is_terminal?
     # Cria um termo _Terminal_
-    terminal = Term.new(:terminal)
+    terminal = Predicate.new(:terminal)
 
     # Como o método sempre retorna um array, tira o valor verdade dele
     answer = proof_terms(terminal)
     if answer.size == 1
       return answer.first
+    elsif answer.empty?
+      return false
     else 
       return nil
     end

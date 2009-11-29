@@ -76,12 +76,22 @@ class PrologConnector
   
   def send(message)
     if @status == :connected
+
       # Envia a mensagem
+      print "sending -> "
       puts(message)
+
+      # Só pra ter certeza que já foi tudo
+      @socket.flush
       @socket.puts(message) 
-      
+
       # Lê uma resposta
-      return parser_message @socket.gets
+      response = @socket.gets
+      if response.nil?
+        close
+        return nil
+      end
+      return parser_message response
     else 
       return nil
     end

@@ -27,23 +27,27 @@ get_vars(Predicate, VarList):-
 % Fecha o socket se receber um 'end_of_file'
 term_evaluate(Term, Sin, Sout):-
     Term=end_of_file,
+    write(Sout, 'YAP::TermEvaluate::EOF\n'),
     socket_close(Sin).
 
-% Caso alguma coisa de errado...
+% Caso alguma coisa dê errado...
 term_evaluate(Term, Sin, Sout):-
     not(call(Term)),
     write(Sin, 'false'),
     write(Sin, '\n'),
-    write(Sout, 'YAP::false('),
+    write(Sout, 'YAP::TermEvaluate::False('),
     write(Sout, Term),
     write(Sout, ')'), nl(Sout).
 
 % Avalia o Term e escreve no socket o valor das variáves
 term_evaluate(Term, Sin, Sout):-
     not(ground(Term)),
+
+    write(Sout, 'YAP::TermEvaluate::FindAwnsers\n'),
+
     get_vars(Term, Vars),
     setof(Vars, Term, Solution),
-    write(Sout, 'YAP::evaluated => '),
+    write(Sout, 'YAP::TermEvaluate::Awnsers => '),
     write(Sout, Solution),
     write(Sout, ' % '), nl(Sout),
     write(Sin, Solution),
@@ -52,10 +56,14 @@ term_evaluate(Term, Sin, Sout):-
 % Chama o predicado
 term_evaluate(Term, Sin, Sout):-
     call(Term),
+
+    write(Sout, 'YAP::TermEvaluate::Call ->'), 
+    write(Sout, Term), nl(Sout),
+
     write(Sin, 'true'),
     write(Sin, '\n'),
 
-    write(Sout, 'YAP::true('), 
+    write(Sout, 'YAP::TermEvaluate::True('), 
     write(Sout, Term),
     write(Sout, ')'), nl(Sout).
 
@@ -74,20 +82,21 @@ go:-
     socket_listen(Sock,5),
     socket_accept(Sock,Sin), 
     %% Abre um arquivo para log
-    open('prolog.log', 'write', Sout),
+%    open('prolog.log', 'write', Sout),
+    open('/dev/stdout', 'write', Sout),
     main_loop(Sock, Sin, Sout).
 
    
 main_loop(Sock, Sin, Sout):-
     not(is_stream(Sin)),
-    write(Sout, 'Cloased Socket... Exiting\n'),
+    write(Sout, 'YAP::Main::Socket closed. Exiting.\n'),
     socket_close(Sock).
 
 main_loop(Sock, Sin, Sout):-
-    write(Sout, 'YAP::Sock ..... OK. Lendo entrada\n'),
+    write(Sout, 'YAP::Main::Waiting\n'),
     read(Sin, Term),
-    write(Sout, 'YAP::Entrada .. OK. Term Evaluate: '),
+    write(Sout, 'YAP::Main::Received ->'),
     write(Sout, Term), nl(Sout),
     term_evaluate(Term, Sin, Sout),
-    write(Sout, 'YAP::Goto main_loop\n'),
+    write(Sout, 'YAP::Main::Evaluated\n'),
     main_loop(Sock, Sin, Sout).
