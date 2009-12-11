@@ -82,8 +82,8 @@ go:-
     socket_listen(Sock,5),
     socket_accept(Sock,Sin), 
     %% Abre um arquivo para log
-%    open('prolog.log', 'write', Sout),
-    open('/dev/stdout', 'write', Sout),
+    open('prolog.log', 'write', Sout),
+%    open('/dev/stdout', 'write', Sout),
     main_loop(Sock, Sin, Sout).
 
    

@@ -78,8 +78,8 @@ class PrologConnector
     if @status == :connected
 
       # Envia a mensagem
-      print "sending -> "
-      puts(message)
+#      print "sending -> "
+#      puts(message)
 
       # Só pra ter certeza que já foi tudo
       @socket.flush
