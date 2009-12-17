@@ -30,7 +30,13 @@ class Term
   end
 
   def is_var?
-    @name.to_s == @name.to_s.upcase ? true : false
+    name = @name.to_s
+    if (name.first.to_i == 0) and (not name.first == '0') and 
+        name == name.upcase
+      return true
+    else 
+      return false
+    end
   end
 
   ## Operador de igualdade
@@ -52,6 +58,10 @@ class Term
   ## Para a operação uniq
   def hash
     self.to_pl.hash
+  end
+
+  def head
+    to_pl
   end
 
   def to_pl

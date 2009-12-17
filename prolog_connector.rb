@@ -78,7 +78,7 @@ class PrologConnector
     if @status == :connected
 
       # Envia a mensagem
-#      print "sending -> "
+#      print "Sending -> "
 #      puts(message)
 
       # Só pra ter certeza que já foi tudo
@@ -87,10 +87,13 @@ class PrologConnector
 
       # Lê uma resposta
       response = @socket.gets
+
       if response.nil?
         close
         return nil
       end
+#      print "Received ->"
+#      puts response
       return parser_message response
     else 
       return nil
@@ -100,5 +103,15 @@ class PrologConnector
   def close
     @status = :disconnected
     @socket.close unless @socket.nil?
+  end
+
+  # Manda fatos
+  def assert(facts)
+    facts.each { |fact| send("assert(" + fact + ").\n") }
+  end
+
+  # Remove-os
+  def retract(facts)
+    facts.each { |fact| send("retract(" + fact + ").\n") }
   end
 end
