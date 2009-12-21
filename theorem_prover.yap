@@ -33,8 +33,9 @@ term_evaluate(Term, Sin, Sout):-
 % Caso alguma coisa dê errado...
 term_evaluate(Term, Sin, Sout):-
     not(call(Term)),
+
     write(Sin, 'false'),
-    write(Sin, '\n'),
+
     write(Sout, 'YAP::TermEvaluate::False('),
     write(Sout, Term),
     write(Sout, ')'), nl(Sout).
@@ -42,16 +43,15 @@ term_evaluate(Term, Sin, Sout):-
 % Avalia o Term e escreve no socket o valor das variáves
 term_evaluate(Term, Sin, Sout):-
     not(ground(Term)),
-
     write(Sout, 'YAP::TermEvaluate::FindAwnsers\n'),
-
     get_vars(Term, Vars),
     setof(Vars, Term, Solution),
+
     write(Sout, 'YAP::TermEvaluate::Awnsers => '),
     write(Sout, Solution),
     write(Sout, ' % '), nl(Sout),
-    write(Sin, Solution),
-    write(Sin, '\n').
+
+    write(Sin, Solution).
 
 % Chama o predicado
 term_evaluate(Term, Sin, Sout):-
@@ -61,7 +61,6 @@ term_evaluate(Term, Sin, Sout):-
     write(Sout, Term), nl(Sout),
 
     write(Sin, 'true'),
-    write(Sin, '\n'),
 
     write(Sout, 'YAP::TermEvaluate::True('), 
     write(Sout, Term),
@@ -77,10 +76,11 @@ term_evaluate(Term, Sin, Sout):-
 go:-
     consult('game_description.yap'),
     consult('gdl_prolog_settings'),
-    socket('AF_INET',Sock),
-    socket_bind(Sock,'AF_INET'(_,43210)),
+    socket('AF_UNIX',Sock),
+    socket_bind(Sock,'AF_UNIX'('/tmp/prolog.sock')),
     socket_listen(Sock,5),
     socket_accept(Sock,Sin), 
+
     %% Abre um arquivo para log
     open('prolog.log', 'write', Sout),
 %    open('/dev/stdout', 'write', Sout),
@@ -90,13 +90,19 @@ go:-
 main_loop(Sock, Sin, Sout):-
     not(is_stream(Sin)),
     write(Sout, 'YAP::Main::Socket closed. Exiting.\n'),
+    close(Sout),
     socket_close(Sock).
 
 main_loop(Sock, Sin, Sout):-
     write(Sout, 'YAP::Main::Waiting\n'),
+%    time(read(Sin, Term)),
     read(Sin, Term),
     write(Sout, 'YAP::Main::Received ->'),
     write(Sout, Term), nl(Sout),
     term_evaluate(Term, Sin, Sout),
+
+    write(Sin, '\n'),
+    flush_output(Sin),
+
     write(Sout, 'YAP::Main::Evaluated\n'),
     main_loop(Sock, Sin, Sout).

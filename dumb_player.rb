@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-require 'ggp_classes_new'
+require 'ggp_classes'
 require 'gdl_parser.tab.rb'
 require 'prolog_connector'
 require 'profiler'
@@ -18,23 +18,23 @@ pl_file << game.to_pl
 pl_file.close
 prolog = PrologConnector.new
 
-#Profiler__::start_profile
 
 state = GameState.new(game.inits, game, prolog)
-#while not state.is_terminal?
+while not state.is_terminal?
+  stime=Time.now
   legals = state.legals
-  puts legals
 
-#  action = state.choose
-#  printf "Chosen::"
-#  puts action
-#  state = state.next(action)
+  action = state.choose
+  printf "Player::Choose::"
+  puts action
+  state = state.next(action)
 
-  state = state.next(legals.first)
+#  state = state.next(legals.first)
   puts state.statements
-#end
+  etime=Time.now
+  print "Player::Delay::"
+  puts (etime-stime)
+end
 
-#Profiler__::stop_profile
-#Profiler__::print_profile($stderr)
-
+prolog.close
 puts "Fim"

@@ -133,6 +133,7 @@ class GameState
 
     new_state = []
     unified = prove(@@game.nexts)
+    unified.uniq!
     unified.each { |new| new_state << unpack(new)}
 
     @@prolog.retract(action)
@@ -208,8 +209,8 @@ class GameState
       # Simula uma ação aleatória para o próximo estado
       action = self.random_choice
       random = self.next(action)
-      puts action
-      puts random.statements
+#      puts action
+#      puts random.statements
 
       random.simulate
       
@@ -228,7 +229,7 @@ class GameState
         max = score if score > max
       else
         scores.each do |score_string| 
-          puts score_string
+ #         puts score_string
           
           score = score_string.scan(/\d+/).first.to_i
           max = score if score > max

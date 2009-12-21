@@ -7,7 +7,7 @@ class YapProlog
 
   inline do |builder|
     builder.add_compile_flags %q{ -I../YAP4.3.0}
-    builder.add_link_flags  %q{ -lYap -lreadline -lm}
+    builder.add_link_flags  %q{ -lYap -lreadline -lm -lgmp -lgmpxx}
     builder.c '''
       #include <stdio.h>
       #include "Yap/YapInterface.h"
@@ -46,26 +46,28 @@ class PrologConnector
     fork { YapProlog.new.start }
 
     sleep(1)
-    @socket = TCPSocket.open(@@hostname, @@port) rescue nil
+    @socket = UNIXSocket.open('/tmp/prolog.sock') rescue nil
     @status = @socket.nil?? :disconneted : :connected
   end
 
   # Transforma a mensagem recebida em um array, ou booleano
   def parser_message(message)
-    # Retira o "\n" enviado
+    return nil if message == ""
+
     message.gsub! "\n", ""
 
     case message
     when 'true'
-      return true
+      message = true
     when 'false'
-      return false
+      message = false
     else
       # eval para transformar a string em um array
-      return eval(message.gsub(/(\w+?)/, "'\\1'"))
+      message = eval(message.gsub(/(\w+?)/, "'\\1'"))
     end
-  end
 
+    return message
+  end
 
   public
   def initialize(host=nil, port=nil)
@@ -73,31 +75,43 @@ class PrologConnector
     @@port = port unless port.nil?
     connect
   end
-  
+
   def send(message)
     if @status == :connected
 
       # Envia a mensagem
-#      print "Sending -> "
+#      print "Player::Sending -> "
 #      puts(message)
 
-      # Só pra ter certeza que já foi tudo
+      # Envia a mensagem
+      @socket.write(message) 
       @socket.flush
-      @socket.puts(message) 
 
       # Lê uma resposta
-      response = @socket.gets
-
-      if response.nil?
-        close
-        return nil
-      end
-#      print "Received ->"
-#      puts response
-      return parser_message response
+      return self.recv
     else 
       return nil
     end
+  end
+
+  def recv
+#    stime=Time.now
+    response = ""
+    partial = @socket.readpartial(1024)
+    response << partial
+
+    while not partial[-1] == 10
+      partial = @socket.readpartial(1024)
+      response << partial
+    end
+
+#    etime=Time.now
+#    print "Player::Delay::"
+#    puts (etime-stime)
+#    print "Player::Received ->"
+#    puts response
+
+    return parser_message(response)
   end
 
   def close
