@@ -160,7 +160,35 @@ class GameState
     possibles = possibles.sort_by { rand }
     possibles.first
   end
-  
+
+  ## Escolhe o estado menos visitado
+  def least_visited
+    possibles = self.legals
+    neighbors = []
+
+    possibles.each do |action|
+      neighbor = {}
+      neighbor[:state] = self.next(action)
+      neighbor[:md5] = neighbor.md5
+      neighbor[:action] = action
+      neighbors << neighbor
+    end
+
+    least = {:action  => "", :visits => 99999}
+    neighbors.each do |neighbor|
+      if @@rewards.has_key? neighbor[:md5]
+        @@rewards[neighbor[:md5]][:visits] += 1
+      else
+        @@rewards[neighbor[:md5]][:visits] = 1
+        @@rewards[neighbor[:md5]][:value] = 0.5
+      end
+      if @@rewards[neighbor[:md5]][:visits] < least[:visits]
+        least[:visits] = @@rewards[neighbor[:md5]][:visits]
+        least[:action] = neighbor[:action]
+      end
+    end
+  end
+
   ## Escolhe a melhor ação usando o método de Monte Carlo.
   def choose
 
@@ -200,6 +228,23 @@ class GameState
     actions[max[:index]]
   end
 
+  def reward
+    query = "goal(Player, Score)"
+    scores = prove(query)
+    
+    return false unless scores
+
+    if scores.first.is_a? String
+      return [scores.last.to_i]
+    else
+      slist = []
+      scores.each do |score|
+        slist << score.scan(/\d+/).first.to_i
+      end
+      return slist.sort
+    end
+  end
+
   ## Simula jogadas aleatórias até atingir o fim do jogo
   def simulate
 
@@ -209,9 +254,6 @@ class GameState
       # Simula uma ação aleatória para o próximo estado
       action = self.random_choice
       random = self.next(action)
-#      puts action
-#      puts random.statements
-
       random.simulate
       
       # Calcula a recompensa
@@ -219,24 +261,10 @@ class GameState
 
     else
       # Descobre a pontuação atingida
-      query = "goal(Player, Score)"
-      scores = prove(query)
-      max = 0
+      scores = self.reward
 
-      # Seleciona apenas o maior, caso haja mais de um
-      if scores.first.is_a? String
-        score = scores.last.to_i
-        max = score if score > max
-      else
-        scores.each do |score_string| 
- #         puts score_string
-          
-          score = score_string.scan(/\d+/).first.to_i
-          max = score if score > max
-        end
-      end
       # Guarda a recompensa
-      @@rewards[self.md5] = max
+      @@rewards[self.md5] = scores.first
     end
   end
 
@@ -245,9 +273,8 @@ class GameState
   def estimate_reward(last)
 
     # Estado nunca foi visitado
-    unless @@rewards.has_key? self.md5
+    if not @@rewards.has_key? self.md5
       @@rewards[self.md5] = 0.5 - STEP_SIZE*(@@rewards[last] - 0.5)
-    
     else
       # Se já foi visitado só atualiza o valor se ele for maior
       old = @@rewards[self.md5]

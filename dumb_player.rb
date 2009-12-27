@@ -36,5 +36,7 @@ while not state.is_terminal?
   puts (etime-stime)
 end
 
+print "Player::Score::"
+puts state.reward
 prolog.close
 puts "Fim"
