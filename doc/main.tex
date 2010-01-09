@@ -1,0 +1,48 @@
+\documentclass[12pt,a4paper]{ufpr}
+\usepackage[brazil]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{ps-macros}
+\usepackage{setspace}
+
+\setcounter{secnumdepth}{3}    % n - numero de niveis de subsubsection numeradas
+\setcounter{tocdepth}{3}       % coloca ate o nivel n no sumario
+
+\title{General Game Playing Review}
+\author{Ulysses Bonfim dos Santos}
+\advisortitle{Orientador} % ou Orientador
+\advisorname{Prof. Dr. Marcos Alexandre Castilho}
+\advisorplace{Departamento de Informática, UFPR}  % departamento, instituicao
+\city{Curitiba}
+\year{2009}
+
+\begin{document}
+\makecapadissertacao           % cria capa para dissertacao de mestrado %
+\makerosto                     % cria folha de rosto para versao final da UFPR %
+%\maketermo                     % cria folha com o termo de aprovacao da dissertacao%
+
+\doublespacing            % espacamento 2 - UFPR 
+\pagestyle{headings}
+\pagenumbering{roman}
+
+\tableofcontents
+
+\chapter*{Resumo}
+\addcontentsline{toc}{chapter}{\MakeUppercase{Resumo}}
+\input{resumo.tex}           % somente o texto
+\newpage
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{\MakeUppercase{Abstract}}
+\input{abstract.tex}        % somente o texto
+\newpage
+
+\pagenumbering{arabic}
+
+\input{introducao.tex}
+\input{ggp.tex}
+\input{gdl.tex}
+%\input{heuristica.tex}
+%\input{implementacao.tex}
+%\input{conclusao.tex}
+
+\end{document}
