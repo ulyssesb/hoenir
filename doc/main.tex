@@ -3,11 +3,13 @@
 \usepackage[utf8]{inputenc}
 \usepackage{ps-macros}
 \usepackage{setspace}
+\usepackage{amsmath}
+
 
 \setcounter{secnumdepth}{3}    % n - numero de niveis de subsubsection numeradas
 \setcounter{tocdepth}{3}       % coloca ate o nivel n no sumario
 
-\title{General Game Playing Review}
+\title{General Game Playing - A Survey}
 \author{Ulysses Bonfim dos Santos}
 \advisortitle{Orientador} % ou Orientador
 \advisorname{Prof. Dr. Marcos Alexandre Castilho}
@@ -28,21 +30,25 @@
 
 \chapter*{Resumo}
 \addcontentsline{toc}{chapter}{\MakeUppercase{Resumo}}
-\input{resumo.tex}           % somente o texto
+\input{chapters/resumo.tex}           % somente o texto
 \newpage
 
 \chapter*{Abstract}
 \addcontentsline{toc}{chapter}{\MakeUppercase{Abstract}}
-\input{abstract.tex}        % somente o texto
+\input{chapters/abstract.tex}        % somente o texto
 \newpage
 
 \pagenumbering{arabic}
 
-\input{introducao.tex}
-\input{ggp.tex}
-\input{gdl.tex}
+\input{chapters/introducao.tex}
+\input{chapters/gdl.tex}
 %\input{heuristica.tex}
 %\input{implementacao.tex}
 %\input{conclusao.tex}
 
+\bibliographystyle{brazil}
+\bibliography{main}
+
+\addcontentsline{toc}{chapter}{\MakeUppercase{Bibliografia}}
+\singlespacing
 \end{document}
