@@ -1,0 +1,129 @@
+\chapter{Game Description Language}
+\label{gdl}
+
+Para que a construção de um sistema autônomo em GGP seja possível, é preciso uma linguagem padrão para a descrição dos jogos. \textit{Game Description Language}\cite{gdl}(GDL), derivada da lógica de Primeira Ordem e um subconjunto de \textit{Knowledge Interchage Format}, é a linguagem usada em todas as competições realizadas até hoje. GDL é puramente axiomática, nenhuma algebra é incluida na linguagem. Caso o jogo necessite, as regras aritiméticas pertinentes devem ser incluidas na descrição.
+
+A classe de jogos que pode ser descrita em GDL pode ser classificada como \textit{n-jogadores} ($n \geq 1 $), \textit{determinística}, \textit{perfeitamente informada} com \textit{movimentos simultâneos}. "Determinística", exclui os jogos que contenham elementos aleatórios, como Gamão, onde a movimentação das peças é feita de acordo com um lançamento de dados. Já "perfeitamente informado" proíbe que qualquer informação sobre o estado atual seja escondida de algum jogador, o que é comum na maioria dos jogos de cartas. Finalmente "movimentos simultâneos" permite descrever jogos como Jan-ken-pon (pedra-papel-tesoura), onde todos os jogadores agem de uma vez, mas sem descartar jogos com alternância nas movimentações entre jogadores, como xadrez ou damas, restringindo todos os jogadores, exceto um, a executar apenas a ação "no-op". GDL também é \textit{finita} em muitos aspectos: o espaço de estados consiste em muitos estados finitos; há também um número finito e fixo de jogadores; cada jogador tem um número finito de possibilidades de ações em cada estado e os jogos devem ser formulados de maneira que culmine em um estado terminal com um número finito de movimentos. Cada estado terminal está associado com um valor (\textit{goal}) para cada jogador. 
+
+Os jogos em GDL são modelados como máquinas de estado, em que cada estado pode ser descrito como um conjunto de fatos verdadeiros em um determinado tempo. Um destes estados é projetado para ser o estado inicial. As transições são determinadas combinando as ações de todos os jogadores. O jogo prossegue até que um dos estados finais seja atingido.
+
+\section{Estrutura da linguagem}
+Um pequeno conjunto de palavras chaves é usado para a descrição dos jogos: \textit{role}, \textit{init}, \textit{next}, \textit{true}, \textit{does}, \textit{terminal}, \textit{goal} e \textit{distintic}. Para ilustrar o uso na linguagem na descrição de um jogo, tomaremos como exemplo a descrição parcial do \textbf{jogo da velha}, onde os estados correspondem a configuração de preenchimento das células de uma matriz $3x3$ com \textit{x} ou \textit{o}. A descrição completa se encontra no apêndice.
+
+\subsection{Jogo da velha em GDL}
+\subsubsection*{Role}
+A palavra chave \textit{role} é usada para descrever quais serão os jogadores da partida. Neste caso temos um jogador para marcar \textit{x} e outro \textit{o}. Vale notar a notação infixada que o GDL usa, diferente do Prolog que usa notação prefixada, onde a mesma declaração do jogador \textit{x} seria feita como \texttt{role(xplayer)}.
+\begin{verbatim}                                                                                         
+  (role xplayer)                                                                                         
+  (role oplayer)                                                                                         
+\end{verbatim}
+
+\subsubsection*{Init}
+O estado inicial é constituído do conjunto de argumentos dos predicados \textit{init}. O jogo da velha se inicia com todas as células em branco e o jogador \textit{x} com o direito a jogada.
+\begin{verbatim}                                                                                         
+  (init (cell 1 1 b))                                                                                    
+  (init (cell 1 2 b))                                                                                    
+\end{verbatim}
+	\hspace{1.5cm} {\LARGE{ \vdots }}
+\begin{verbatim}	
+  (init (cell 3 3 b))                                                                                    
+  (init (control xplayer))                                                                               
+\end{verbatim}
+
+\subsubsection*{True}
+O predicado \textit{init} pode ser visto como um restrição da relação \textit{true}, usada para escrever o que é verdade em um estado qualquer durante o decorrer do jogo. Em contrapartida, \textit{init} só pode ser usado para a descrição do estado inicial. Após o primeiro movimento, a descrição do estado atual seria:
+\begin{verbatim}                                                                                         
+	(true (cell 1 1 b))
+\end{verbatim}
+	\hspace{1.5cm} {\LARGE{ \vdots }}
+\begin{verbatim}	
+  	(true (cell 2 2 x))                                                                                    
+  	(true (control oplayer))                                                                               
+\end{verbatim}
+indicando que o jogador \textit{x} marcou o centro da matriz e que agora o controle passa para o jogador \textit{o}.
+
+\subsubsection*{Next}
+Análoga à palavra chave \textit{true}, o predicado \textit{next} determina quais fatos serão verdades no próximo estado. A marcação do direito à jogada é feito da seguinte maneira:
+\begin{verbatim}                                                                                         
+  (<= (next (control xplayer))                                                                           
+      (true (control oplayer)))                                                                          
+  (<= (next (control oplayer))                                                                           
+      (true (control xplayer)))                                                                          
+\end{verbatim}
+O primeiro predicado \textit{next} mostra que na próxima rodada o controle será do jogador \textit{x} somente se no estado atual ele pertencer a seu oponente. A segunda declaração empreende o mesmo papel para indicar ao jogador \textit{o} quando será sua vez.
+
+\subsubsection*{Legal}
+As regras do jogo da velha permitem que um jogador marque uma célula apenas se ela ainda não foi marcada (contém um \textit{b}) e seja sua vez de jogar. Para descrever estas regras, a relação \textit{legal}, juntamente com os demais predicados vistos, toma como parâmetro um jogador e ação a que ele tem direito. Em GDL, termos não unificados são marcados com o símbolo de interrogação.
+\begin{verbatim}                                                                                         
+  (<= (legal ?player (mark ?x ?y))                                                                       
+      (true (cell ?x ?y b))                                                                              
+      (true (control ?player)))                                                                          
+  (<= (legal xplayer noop)                                                                               
+      (true (control oplayer)))                                                                          
+  (<= (legal oplayer noop)                                                                               
+      (true (control xplayer)))                                                                          
+\end{verbatim}
+A primeira relação descreve a regra fundamental do jogo da velha. As outras duas relações simulam a alternância entre o controle das jogadas, causando um dos jogadores a tomar a ação \textit{noop}\footnote{No Operation, \textit{nenhuma ação}} quando não estiver no controle.
+
+\subsubsection*{Distinct}
+Usado para distinguir duas proposições, o predicado \textit{distinct} será verdadeiro somente se seus argumentos não forem iguais.
+\begin{verbatim}                                                                                         
+  (<= (next (cell ?x ?y b))                                                                              
+      (does ?player (mark ?m ?n))                                                                        
+      (true (cell ?x ?y b))                                                                              
+      (distinctCell ?x ?y ?m ?n))                                                                        
+  (<= (distinctCell ?x ?y ?m ?n)                                                                         
+      (distinct ?x ?m))                                                                                                                                                
+  (<= (distinctCell ?x ?y ?m ?n)                                                                         
+      (distinct ?y ?n))                                                                                  
+\end{verbatim}
+
+\subsubsection*{Terminal}
+Para determinar se o estado atingido é um estado final, os predicados \textit{terminal} devem ser consultados. 
+\begin{verbatim}                                                                                         
+  (<= terminal                                                                                           
+      (line x))                                                                                                                                                                                
+  (<= terminal                                                                                           
+      (line o))                                                                                          
+  (<= terminal                                                                                           
+      (not open))                                                                                        
+\end{verbatim}
+Destas regras tem se que o jogo acaba ao marcar uma sequência de três células, para ambos os jogadores, ou quando não há mais espaços em brancos.
+
+\subsubsection*{Goal}
+Ao final do jogo, cada jogador terá uma pontuação de acordo com o seu desempenho. 
+\begin{verbatim}
+  (<= (goal xplayer 100)                                                                                 
+      (line x))                                                                                          
+  (<= (goal xplayer 50)                                                                                  
+      (not (line x))                                                                                     
+      (not (line o))                                                                                     
+      (not open))                                                                                        
+  (<= (goal xplayer 0)                                                                                   
+      (line o))   
+\end{verbatim}
+Este recorte da descrição revela a pontuação do jogador \textit{x} caso ele vença, empate ou perca, ganhando 100, 50 ou 0, respectivamente. As mesmas regras para o jogador \textit{o} também são encontradas na descrição.
+
+\section{Considerações}
+Algumas consideraçãoes a cerca da linguagem e suas propriedades devem ser feitas.
+
+\subsection{Predicados auxiliáres}
+As relações fundamentais vistas acima contam com o uso de predicados auxiliáres na descrição. Usado na relação \textit{init}, o predicado \textit{(cell ?x ?y ?p)} indica qual marca a célula \textit{xy} contém. O número de regras auxiliáres que podem ser usadas na descrição é indefinido. Esta descrição do jogo da velha contém outros exemplos, como: \textit{control}, \textit{distinctCell}, \textit{line}, \textit{open} e outros.
+
+\subsection{Nenhuma dica léxica}
+Um agente GGP não pode contar com a descrição do jogo para construír uma função heurística. Exceto pelas palavras chave, nenhum outro conjunto de símbolos tem algum significado para o jogador. Na verdade, durante a competição, os símbolos usados na descrição são embaralhados para previnir que o jogador retire alguma dica léxica. Por exemplo, uma das estruturas mais básicas dos jogos é o tabuleiro. Na competição a mesma descrição do tabuleiro poderia ser algo como:
+\begin{verbatim}                                                                                         
+  (init (homer bart bart santa))                                                                                    
+  (init (homer bart lisa santa))                                                                                    
+\end{verbatim}
+	\hspace{1.5cm} {\LARGE{ \vdots }}
+\begin{verbatim}	
+  (init (homer magie magie santa))                                                                                                                                                           
+\end{verbatim}
+
+\subsection{Problema do Quadro (The Frame Problem)}
+Segundo Ginsberg \cite{mginsberg},  é um questionamento de como representamos o fato de que as coisas tendem a continuar as mesmas na ausência de informações contrárias. Em GDL, o próximo estado sempre é definido pela relação \textit{next}, logo a regra para o problema do quadro é declarar explicitamente o que será verdadeiro após as transição de estados. 
+No exemplo do predicado \textit{distinct}, as regras declaram que uma célula permanecerá em branco caso nenhum jogador a tenha marcado na rodada atual. 
+
+\subsection{Jogos Finitos}
+Como mencionado anteriormente, somente jogos de tamanho finito são permitidos.  Enquanto jogos como jogo da velha são garantidamente finitos, a maioria dos jogos, como o mundo dos blocos, tem ciclos em suas máquinas de estados que permitem uma infinita sequência de ações (como por exemplo, empilhar e desempelhar o mesmo bloco idefinidamente). Portanto o construtor da descrição de garantir que o mesmo estado não seja atingido duas vezes na mesma partida, e que todas as partidas invariavelmente atinjam um estado final. A maneira mais comum para fazer isso é adicionar a descrição um contador (\textit{step}), incrementar o seu valor a cada ação e acabar o jogo quando um certo número máximo for atingido.
