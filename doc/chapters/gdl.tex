@@ -33,12 +33,12 @@ O estado inicial é constituído do conjunto de argumentos dos predicados \texti
 \subsubsection*{True}
 O predicado \textit{init} pode ser visto como um restrição da relação \textit{true}, usada para escrever o que é verdade em um estado qualquer durante o decorrer do jogo. Em contrapartida, \textit{init} só pode ser usado para a descrição do estado inicial. Após o primeiro movimento, a descrição do estado atual seria:
 \begin{verbatim}                                                                                         
-	(true (cell 1 1 b))
+   (true (cell 1 1 b))
 \end{verbatim}
 	\hspace{1.5cm} {\LARGE{ \vdots }}
 \begin{verbatim}	
-  	(true (cell 2 2 x))                                                                                    
-  	(true (control oplayer))                                                                               
+   (true (cell 2 2 x))                                                                                    
+   (true (control oplayer))                                                                               
 \end{verbatim}
 indicando que o jogador \textit{x} marcou o centro da matriz e que agora o controle passa para o jogador \textit{o}.
 

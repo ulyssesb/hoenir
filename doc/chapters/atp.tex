@@ -1,0 +1,95 @@
+\chapter{Prova Automática de Teoremas}
+Para processar as descrições em GDL, é imprescindível o uso de um Provador Automático de Teoremas (Automatic Theorem Proving, \textit{ATP}), que é um programa para provar teoremas matemáticos. A linguagem em que os teoremas são escritos é logica, comumente lógica de primeira ordem. Teoremas são compostos de axiomas e hipóteses que levam a uma conclusão  (ou não). Sistemas ATP produzem provas que descrevem como e porquê a conclusão é uma consequência lógica dos axiomas e das hipóteses.
+
+As provas produzidas por um sistema ATP são construídas para serem facilmente compreensíveis. Por exemplo, se o jogo Torres de Hanoi fosse formulado como um teorema, a prova descreveria a sequência de movimentos necessários para resolver o problema.
+
+\section{Inferência}
+Em lógica, uma \textit{regra de inferência} é uma regra de raciocínio sobre um conjunto de sentenças, chamado \textit{premissas}, e um segundo conjunto de sentenças chamado \textit{conclusão}. Abaixo uma regra de inferência chamada Modus Pones.
+\begin{enumerate}
+  \singlespacing
+  \item \verb|A| $\Rightarrow$ \verb|B         | (se A é verdade então B é verdade)
+  \item \verb|A             | (A é verdade)
+  \item \verb|B             |, por \textit{1} e \textit{2} (B é verdade)
+\end{enumerate}
+ \doublespacing
+
+Para provar um teorema, os axiomas da teoria a ser provada são primeiramente colocados em um forma padrão chamada forma clausal. Um algoritmo de inferência é então aplicado exaustivamente para o resultante conjunto de clausulas na busca por uma contradição. O componente principal que realiza o algoritmo de inferência é conhecido como \textit{máquina de inferência}.
+
+As duas seções seguintes descrevem como um sistema ATP é usado para retirar informações cruciais para um jogador compreender a estrutura lógica de um jogo e realizar movimentos permitidos pelo mesmo.
+
+\section{Determinando jogadas legais}
+A partir do estado inicial, todos os predecessores são derivados usando as regras \textit{legal} e \textit{next}, como pode ser visto no exemplo abaixo.
+
+Os axiomas abaixo foram retirados da descrição do estado inicial (regras \textit{init}) do jogo da velha.
+\begin{enumerate}
+  \singlespacing
+  \item \verb|cell(1 1 b)|
+  \item \verb|control(xplayer)|
+\end{enumerate}
+ \doublespacing
+
+Para sumarizar as jogadas legais em um determinado estado do jogo, o predicado \textit{legal} deve ser usado sobre a base de fatos que constitui o estado atual.
+
+\begin{enumerate}
+	\singlespacing
+  	\setcounter{enumi}{2}
+  	\item 
+  		\begin{verbatim}
+  (<= (legal ?player (mark ?x ?y))                                                                       
+      (true (cell ?x ?y b))                                                                              
+      (true (control ?player)))               
+ 		\end{verbatim}
+\end{enumerate}
+ \doublespacing
+
+Por se tratar de uma linguagem deveriada da lógica de primeira ordem, as descrições em GDL podem ser transcritas para outras linguagem de mesma ascenção, como Prolog. O predicado \textit{legal} acima, por exemplo:
+
+\begin{enumerate}
+ 	\singlespacing
+  	\setcounter{enumi}{2}
+  	\item 
+  		\verb|(cell(X, Y, b)| $\land$ \verb|control(Player))| $\Rightarrow$ \verb|legal(Player, (mark(X, Y)))|
+\end{enumerate}
+ \doublespacing
+
+As jogadas possíveis em um determinado estado são inferidas da base de conhecimento aplicando-se as regras de movimentação.
+\begin{enumerate}
+  	\singlespacing
+  	\setcounter{enumi}{3}
+  	\item 
+  		\verb|legal(xplayer, (mark (1, 1)))|, por {\it 1, 2} e {\it 3}
+\end{enumerate}
+\doublespacing
+
+ 
+ \section{Constituindo um novo estado}
+ Os estados subsequêntes ao inicial, que é descrito pelo conjunto \textit{init}, são determinados após os jogadores realizarem seus movimentos, através da declaração \textit{does} que deve ser inserida na base de fatos. Seguindo o exemplo anterior, caso o jogador \textit{x} escolha a ação de marcar a célula (1, 1), o predicado \textit{does} referente a esta jogada será:
+\begin{enumerate}
+  	\singlespacing
+  	\setcounter{enumi}{4}
+	\item 
+		\begin{verbatim}
+			(does (xplayer (mark ?x ?y))))
+		\end{verbatim}		
+\end{enumerate}
+ \doublespacing
+
+Em poder das ações tomadas por todos os jogadores na atual rodada, com o uso do predicado abaixo o próximo estado pode ser encontratado. É importare relembrar que em todas as rodadas todos os jogadores realizam uma ação. Mesmo nos jogos onde há alternância de turnos, como o próprio jogo da velha, o oponente fica restrito a ação \textit{noop}.
+\begin{enumerate}
+  	\singlespacing
+  	\setcounter{enumi}{5}
+   	\item 
+   		\begin{verbatim}
+  (<= (next(cell(?x ?y x)))
+      (does (xplayer (mark ?x ?y))))               
+ 		\end{verbatim}
+\end{enumerate}
+\doublespacing
+Assim o primeiro termo constituinte do novo estado é inferido. Com a aplicação das demais regras \textit{next} tem-se um estado completo. 
+\begin{enumerate}
+  	\singlespacing
+  	\setcounter{enumi}{6}
+	\item 
+		\verb|next(cell(1 1 x))|, por {\it 5} e {\it 6}
+\end{enumerate}
+\doublespacing

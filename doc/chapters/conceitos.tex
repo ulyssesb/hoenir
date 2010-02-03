@@ -1,0 +1,15 @@
+\chapter{Conceitos básicos}
+\label{concepts}
+A construção de um agente autônomo para jogos demanda a utilização de técnicas e conhecimentos diversos que estão além do escopo deste trabalho. Porém, algumas palavras chaves tangem todos os trabalhos nesta área. Este capítulo dará uma breve introdução a estes conceitos.
+
+\section{Árvore de Jogo}
+Um jogo pode ser representado como um grafo dirigido, uma \textit{árvore}, representando o espaço de estados de um jogo. Em jogos determinísticos, cada \textit{nó} na árvore representa um estado do jogo, e cada \textit{aresta} representa um movimento. A \textit{raíz} da árvore é o estado inicial do jogo, antes de qualquer jogador fazer qualquer movimento. Um \textit{estado terminal} é a posição que as regras determinam que um jogo chegou ao fim. 
+
+Um nó é \textit{expandido} quando todos os seus sucessores são descobertos da posição representada pelo nó. Um sucessor direto do nó é denominado \textit{filho} do nó. O predecessor direto é chamado \textit{pai}. A raiz, ou o estado inicial do jogo, é o único nó sem um pai. Da mesma forma, nós terminais são os únicos que não têm filhos.
+
+A árvore do jogo é gerada expandindo todo nó, a partir do nó raiz, até todos o nós terminais serem atingidos. Cada nó terminal tem um valor associado, conhecido como \textit{recompensa}, para cada jogador. 
+
+Examinar completamente a árvore de um jogo, da raíz até os terminais, é garantidamente a melhor estratégia para vencer um jogo. No entanto, para os jogos mais interessantes a árvore completa é extremanente grande, logo inviável computacionalmente. 
+
+\section{Busca}
+Quando a árvore de jogo é muito grande para ser gerada integralmente, uma \textit{árvore de busca} é usada em seu lugar. A árvore de busca é apenas parte da árvore de jogo. A raíz da árvore de busca representa o estado sob investigação. Esta árvore é gerada durante o processo de busca. Nós que ainda não foram expandidos são chamados \textit{folhas}. Quando um nó terminal não é alcançado a recompensa associada a ele é dado por uma \textit{função de avaliação} (ou \textit{heurística}). A heurística produz uma recompensa estimada de quão bom seria para o jogador atingir aquele estado.

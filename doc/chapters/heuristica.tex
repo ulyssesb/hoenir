@@ -1,0 +1,34 @@
+\chapter{Heurística}
+O modo mais comum para aplicar Inteligência Artificial à jogos é utilizar métodos como \textit{A*} e \textit{MiniMax}, para representar a árvore de busca, em conjunto com uma heurística, desenvolvida com algum conhecimento prévio do jogo. No entanto, desenvolver uma heurística em GGP não é uma tarefa trivial. A maioria dos jogadores GGP tem soluções únicas para esse problema, pois não existe nenhuma pesquisa sólida que diga como gerar uma boa heurística generalista. Algumas abordagem usam características dos jogos, como número de peças, que podem contribuir com a heurística em muitos jogos, mas que em outro conjunto de jogos pode não funcionar ou até mesmo causar prejuízo na avaliação.
+
+Ao lidar com GGP é portanto mais interessante investigar funções de avaliação que não dependem de características específicas, que podem não existir ou fazer sentido em todos jogos. Contar peças, por exemplo, pode ser bom em xadrez mas não faz sentido algum no jogo da velha. A solução adota neste trabalho é uma função de avaliação que explore os estados e descubra através de simulações quão bom ou ruim eles são.
+
+
+\section{Monte Carlo}
+O conjunto de métodos de Monte Carlo\cite{rlearning} necessitam apenas de experiência na interação com o sistema para estimar o valor de uma função de avaliação. A partir da descrição da mecánica do sistema é possível obter a experiência simulando as interações. Um  conjunto de simulações realizadas com um número de passos finitos é conhecida como \textit{tarefa episódica}. Uma única simulação da tarefa é chamada de \textit{episódio} e a pontuação obtida durante o episódio é o \textit{retorno}. 
+
+A ideia fundamental é aprender na média dos retornos obtidos durante as simulações. A experiência é divida em episódios que eventualmente levam a um objetivo e no final deste as estimativas de valores são obtidas. Os métodos de Monte Carlo são, de certa forma, incrementais, pois as médias são alteradas após cada episódio. O termo "Monte Carlo" é frequentemente usado em qualquer estimativa que envolva algum componente randômico. Neste caso, é usada aleatoriedade para percorrer os estados durante as simulações.
+
+Cada estado mantem uma estimativa da recompensa total acumulada, $V(s)$, que o jogador irá atingir caso vá para o estado $s$. Ao final da simulação de cada episódio, o retorno é propagado retroativamente para todos os estados visitados no episódio e a média é recalculada. A média dos retornos pode ser calculada incrementalmente da seguinte maneira:
+\begin{equation}
+V(s) \leftarrow V(s) + \frac{1}{n(s)}[R - V(s)]
+\end{equation}
+onde $n(s)$ é o número de visitas ao estado $s$ e $R$ o retorno obtido no términdo da simulação. 
+
+\section{UCT}
+Monte Carlo basea-se em repetidas simulações randômicas para gerar resultado. A estratégia mais simples é repetir as simulações até esgotar-se o tempo, e escolher o movimento com melhor retorno. Usar esta estratégia no entanto, faz que o tempo seja gasto igualmente na exploração de bons e de maus movimentos. Se em vez disso fosse usada a informação já obtida, deixando os bons movimentos com um peso maior, o desempenho do jogador seria melhorado, já que usar o tempo explorando quão ruim um mau movimento é, é perda de tempo. 
+
+Este problema é uma variante do \textit{multi armed bandit}\footnote{http://en.wikipedia.org/wiki/Multi-armed\_bandit}. Uma das estratégias conhecidas é o algoritmo UCB\cite{ucb}.
+
+
+
+
+
+
+
+
+
+
+
+
+
