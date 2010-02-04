@@ -175,11 +175,15 @@
       {\large \textbf{\MakeUppercase\@title}}\\
       \vspace{4cm}
       
-      \hfill{\parbox{8cm}{Disserta{\c   c}{\~a}o  apresentada   como
-          requisito  parcial  {\`a} obten{\c  c}{\~a}o  do  grau  de
-          Mestre.    Programa  de     P{\'o}s-Gradua{\c    c}{\~a}o  em
-          Inform{\'a}tica, Setor de Ci{\^e}ncias Exatas,
-          Universidade Federal  do  Paran{\'a}.\\
+%%       \hfill{\parbox{8cm}{Disserta{\c   c}{\~a}o  apresentada   como
+%%           requisito  parcial  {\`a} obten{\c  c}{\~a}o  do  grau  de
+%%           Mestre.    Programa  de     P{\'o}s-Gradua{\c    c}{\~a}o  em
+%%           Inform{\'a}tica, Setor de Ci{\^e}ncias Exatas,
+%%          Universidade Federal  do  Paran{\'a}.\\
+      \hfill{\parbox{8cm}{ Monografia apresentada ao curso de Ci\^{e}ncia da 
+          Computa\c{c}\~{a}o, Setor de Ci\^{e}ncias Exatas, Universidade 
+          Federal do Paran\'{a}, como requisito parcial para a conclus\~{a}o
+          do curso.\\
           \@advisortitle: \@advisorname}}\par  \null\vfill
       \MakeUppercase\@city\\
       \vspace{0.5cm}
