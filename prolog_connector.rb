@@ -147,10 +147,9 @@ class PrologGGPInterface
 
   def initialize(prolog, game_description)
     @@prolog = prolog
-    @@game_description = game
+    @@game_description = game_description
   end
 
-  private:
   ## Prova alguma coisa em um determinado estado
   def prove(state, query)
     # Envia para o prolog o estado atual
@@ -167,7 +166,7 @@ class PrologGGPInterface
     end
 
     # Remove o estado atual
-    @@prolog.retract(@statements)
+    @@prolog.retract(state)
 
     if values.is_a? Array
       return values.flatten
@@ -176,12 +175,11 @@ class PrologGGPInterface
     end
   end
 
-  public:
   ## Encontra as jogadas possíveis no estado atual
   def legals(state)
 
     moves = []
-    unified = prove(@@game_description.legals, state)
+    unified = prove(state, @@game_description.legals)
 
     # Retira o "legal()" e poe um "does()"
     unified.each {|new_move| moves << pack(unpack(new_move), "does") }
@@ -194,11 +192,11 @@ class PrologGGPInterface
     @@prolog.assert(action)
 
     new_state = []
-    unified = prove(@@game_description.nexts)
+    unified = prove(state, @@game_description.nexts)
     unified.uniq!
     unified.each { |new| new_state << unpack(new)}
 
-    @@prolog.retract(action)
+    @@prolog.retract([action])
 
     return new_state
   end
@@ -206,7 +204,7 @@ class PrologGGPInterface
   ## Auto explicativa
   def is_terminal?(state)
     query = "terminal"
-    answer = prove(query, state)
+    answer = prove(state, query)
 
     return answer
   end
@@ -214,7 +212,7 @@ class PrologGGPInterface
   ## Calcula a recompensa (o estado deve ser terminal)
   def reward(state)
     query = "goal(Player, Score)"
-    scores = prove(query, state)
+    scores = prove(state, query)
     
     return false unless scores
 

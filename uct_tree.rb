@@ -14,6 +14,7 @@ class UCTTree
 
   @@prolog = ""
   @@states_hash = {}
+  
   def initialize(game_description, prolog_connector)
     # Interface GGP com o prolog
     @@prolog = PrologGGPInterface.new(prolog_connector, game_description)
@@ -41,16 +42,16 @@ class UCTTree
   ## maior média dos retornos obtidos nas simulações
   ##
   def choose_action
-    best_avarege = 0
-    best_action = nil
+    best_average = 0
+    best_node = nil
     @root.actions.each do |pair|
-      children = pair[:node]
-      if children.returns > best_avarage
-        best_avarege = children.returns
-        best_action = pair[:state]
+      children = @@states_hash[pair[:state_hash]]
+      if children.returns >= best_average
+        best_average = children.returns
+        best_node = children
       end
     end
-    return @@states_hash[:best_action]
+    return best_node
   end
 
 
@@ -79,20 +80,20 @@ class UCTTree
   ## Simulação com UCB como parâmetro de escolha
   ##
   def simulate(time_limit)
-    # Guarda o nó atual e uma lista dos que foram percorridos
-    current_node = @root
-    
     time_is_over = false
     Thread.new { sleep time_limit ; time_is_over = true }
 
     # Simula enquanto tem tempo
     while not time_is_over
-      
+      # Guarda o nó atual e uma lista dos que foram percorridos
+      current_node = @root
+      visited = []
+
       # Desce a árvore até encontrar um nó terminal
-      while not @@prolog.is_terminal?(current_node)
+      while not @@prolog.is_terminal?(current_node.state)
         # Visita o nó
         current_node.look_up
-        visited << current_node
+        visited << current_node.hash
 
         # Primeira visita ao nó
         if current_node.visits == 1
@@ -104,14 +105,23 @@ class UCTTree
         # Busca a melhor ação
         next_state = choose_simulated_action(current_node)
         current_node = next_state
+
+        print "UCTTree::Simulate::Current State: "
+        puts current_node.state
+
       end
       
       # Recompensa alcançada 
-      reward = @@prolog.reward(current_node.state)
-
+      reward = @@prolog.reward(current_node.state).first
+      
+      print "UCTTree::Simulate::End of simulation. Reward: "
+      puts reward
+      print "UCTTree::Simulate::End of simulation. State: "
+      puts current_node.state
+      
       # Atribui o retorno para os nós do caminho percorrido
       visited.each do |node_hash|
-        node = @@states_hash(node_hash)
+        node = @@states_hash[node_hash]
         node.append_return(reward)
       end
     end
@@ -126,48 +136,49 @@ class UCTTree
     # Tenta encontrar alguma ação que não tenha sido simulada
     unexplored_action = unexplored(node)
     
-    unless unexplorede_action.nil?
+    unless unexplored_action.nil?
       # Cria um novo nó
       return create_node(node, unexplored_action)
     end
-    
+
     best_bonus  = 0
-    best_action = nil
+    best_node = nil
     node.actions.each do |pair|
-      children = pair[:node]
-      bonus = children.bonus(@visits)
-      if bonus > best_bonus
+      children = @@states_hash[pair[:state_hash]]
+      bonus = children.bonus(node.visits)
+      if bonus >= best_bonus
         best_bonus = bonus
-        best_action = pair[:state]
+        best_node = children
       end
     end
-    return @@states_hash[:best_action]
+    return best_node
   end
 
   ##
   ## Busca alguma ação que ainda não foi explorada
   ## 
   def unexplored(node)
-    unexplored = nil
+    unexploreds = []
     node.actions.each do |pair|
-      unexplored = pair[:action] if pair[:node].is_nil? 
+      unexploreds << pair[:action] if pair[:state_hash].nil? 
     end
-    return unexplored
+    
+    return unexploreds.choice
   end
 
   ## 
   ## Cria um novo nó apartir do nó atual
   ##
-  def create_node(current, action)
+  def create_node(current, unexplored_action)
     # Realiza a ação não explorada e calcula o próximo estado
-    new_state = @@prolog.next(node.state, unexplored_action)
+    new_state = @@prolog.next(current.state, unexplored_action)
     
     # Gera um novo nó
     new_node = UCTNode.new(new_state)
     @@states_hash[new_node.hash] = new_node
     
     # Guarda o nó
-    node.set_action_node(action, new_node)      
+    current.set_state_action(unexplored_action, new_node.hash)
     
     return new_node
   end

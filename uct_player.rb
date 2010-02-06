@@ -8,6 +8,12 @@ require 'uct_tree'
 
 def parser_description(file_path, debugger)
   gdl_file = File.open(ARGV[0]) rescue nil
+  
+  if gdl_file.nil?
+    puts "UCTPlayer::Error::No game description, no play"
+    exit(1)
+  end
+
   gdl_file ||= File.open 'sample_games/tictactoe.kif'
   gdl_parser = GameDescriptionLanguage.new
 
@@ -32,16 +38,22 @@ description = parser_description(ARGV[0], debugger)
 game_description = GameDescription.new(description)
 
 # Transcreve para prolog
-write_yap_file(game)
+write_yap_file(game_description)
 
 # Chama o provador de teoremas
 prolog = PrologConnector.new
+unless prolog.status == :connected
+  puts "UCTPlayer::Error::Prolog Connector (Address already in use?)"
+  exit(1)
+end
 
 # Cria a árvore de busca
-search_tree = UCTTree.new(game, prolog)
+search_tree = UCTTree.new(game_description, prolog)
 
 # WARMUP!
+puts "UCTPlayer::Warmup::Begin"
 search_tree.warmup
+puts "UCTPlayer::Warmup::End"
 
 # Joga até encontrar o estado final
 while not search_tree.is_terminal?
@@ -57,3 +69,4 @@ end
 # Fim de jogo, mostra a recompensa alcançada
 print "UCTPlayer::Score::"
 puts search_tree.reward
+prolog.close

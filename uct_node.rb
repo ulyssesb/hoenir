@@ -4,6 +4,8 @@
 ## Nó da árvore de busca
 ##
 class UCTNode
+  require 'digest/md5'
+
   attr_accessor :returns, :visits, :actions, :state
   
   ## Parâmetro para o uso do bonus na simulação
@@ -25,14 +27,14 @@ class UCTNode
   ##   T = Número de simulações que passaram pelo nó pai
   ##   N = Número de visitadas ao nó
   def bonus(total)
-    return( returns + BONUS_USE*Math.sqrt( Math.log(total) / visits) )
+    return( @returns + BONUS_USE*Math.sqrt( Math.log(total) / @visits) )
   end
 
   ## 
   ## Insere mais um retorno na média 
   ##
   def append_return(simulated_return)
-    @returns = @returns + (1.0 / @visits)*(simulate_return - @returns)
+    @returns = @returns + (1.0 / @visits)*(simulated_return - @returns)
   end
 
   ##
@@ -46,7 +48,7 @@ class UCTNode
   ## Hash MD5 do estado
   ##
   def hash
-    return Digest::Md5.hexdigest(@state.to_s).to_sym   
+    return Digest::MD5.hexdigest(@state.to_s).to_sym   
   end
   
   ## 
@@ -54,17 +56,17 @@ class UCTNode
   ##
   def set_actions(legals)
     legals.each do |legal|
-      actions << {:action => legal, :state => nil}
+      actions << {:action => legal, :state_hash => nil}
     end
   end
 
   ##
   ## Atualiza a hash de uma ação
   ##
-  def set_state_action(action, state)
+  def set_state_action(action, state_hash)
     actions.each do |pair|
       if pair[:action] == action
-        pair[:state] = node
+        pair[:state_hash] = state_hash
       end
     end
   end
