@@ -28,6 +28,7 @@ get_vars(Predicate, VarList):-
 term_evaluate(Term, Sin, Sout):-
     Term=end_of_file,
     write(Sout, 'YAP::TermEvaluate::EOF\n'),
+    halt,
     socket_close(Sin).
 
 % Caso alguma coisa dê errado...

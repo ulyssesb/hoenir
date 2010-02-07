@@ -7,7 +7,7 @@ class UCTTree
   require 'uct_node'
 
   ## Limites de tempo para as simulações
-  WARMUP_LIMIT = 720
+  WARMUP_LIMIT = 30
   PLAY_LIMIT = 0.7
   
   attr_accessor :root

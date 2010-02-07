@@ -121,7 +121,7 @@ class PrologConnector
 
   def close
     @status = :disconnected
-    @socket.close unless @socket.nil?
+    @socket.close unless @socket.closed?
   end
 
   # Manda fatos
