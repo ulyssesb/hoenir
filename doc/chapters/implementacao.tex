@@ -1,0 +1,74 @@
+\chapter{Implementação}
+A construção do jogador foi dividada da seguinte maneira: um módulo para fazer a análise da descrição em GDL, um provador de teoremas em Prolog e a parte responsável pela inteligência do jogador, implementada usando UCT. A maior parte do código foi escrita em \textit{Ruby}, porém há um resquício de código em \textit{C} e o YAP foi escolhido como o provador de teoremas Prolog.
+
+\section{GDL Parser}
+As descrições dos jogos em GGP são escritas em GDL, que utiliza o padrão Knowledge Interchange Format (KIF). No entanto, como o provador de teoremas foi escrito em Prolog é necessário uma tradução para um formato que o Prolog entenda. Como GDL é um subconjunto da lógica de primeira ordem, essa tarefa é facilmente cumprida. Por exemplo a regra abaixo do jogo da velha:
+\begin{verbatim}
+  (<= (legal ?player (mark ?x ?y))                                                                       
+      (true (cell ?x ?y b))                                                                              
+      (true (control ?player)))
+\end{verbatim}
+será traduzida para
+\begin{verbatim}
+  legal(Player, mark(X, Y)):-
+      cell(X, Y, b), 
+      control(Player).
+\end{verbatim}
+
+O predicado \textit{distinct}, no entanto, necessita de um tratamento especial. Ele recebe duas cláusulas como parâmetro e representam o relacionamento de \textit{não igualdade} entre elas. Em Prolog:
+\begin{verbatim}
+  distintic(X, Y):- X \= Y. 
+ \end{verbatim}
+
+Da mesma maneira, o predicado \textit{or} existe para a relação \textit{ou lógico} entre os parâmetros. Os primeiros jogos utilizavam esta relação com um número arbitrário de parâmetros, mas isto acabou sendo abandonado. Para manter a compatibilidade com os jogos anteriores, foi incluido o código abaixo:
+\begin{verbatim}
+or(X, Y):- 
+    call(X) ; call(Y).
+or(X, Y, Z):- 
+    call(X) ; call(Y) ; call(Z).
+or(X, Y, Z, W):- 
+    call(X) ; call(Y) ; call(Z) ; call(W).
+ \end{verbatim}
+ 
+ Para o parser da descrição, foi utilizada a biblioteca \textit{Rex}, para análise léxica, e \textit{Racc}, para a sintática. A dupla utilizada é equivalente ao \textit{Flex} e \textit{Bison}, porém com implementação para Ruby.
+ 
+ 
+ \section{Provador de Teoremas}
+ O provador de teoremas é iniciado assim que análise da desscrição do jogo termina. Todos os predicados do jogo são inseridos na base, exceto os \textit{inits}, que serão enviados posteriormente para compor o estado inicial. Utilizando o YAP como interface, ele é usado para calcular: os movimentos legais de um jogador em um determinado estado; o próximo estado, dado o estado atual e uma ação válida; a recompensa alcançada ao atingir um estado (\textit{goal}) e se um determinado estado é terminal ou não.
+ 
+ Após a análise da descrição, o arquivo \texttt{game\_description.yap}, contendo os predicados declarados pelo jogo, é gerado e posteriormente carregado no YAP utilizando a cláusula \texttt{consult}. 
+ 
+ A comunicação entre o YAP e o jogador é feita utilizando \textit{Unix Sockets}. Uma primeira versão do jogador foi implementada com \textit{TCP Sockets}, porém o \textit{buffer} comum em conexões TCP, deixava inviável o uso para a construção do jogador. Como os movimentos legais precisam ser calculados para se obter o estado seguinte, o buffer atrasava a saida e, consequentemênte, o desempenho do jogador.
+ 
+Para realizar qualquer ação no provador, o estado atual é enviado e inserido na base de fatos com o predicado \texttt{assert}. Após a avaliação da cláusula desejada (\textit{next}, por exemplo), os fatos são retirados pelo predicado \texttt{retract}. Isto deixa a comunicação ligeiramente mais lenta  pois inserção e remoção de fatos em tempo de execução é um processo custoso.
+ 
+
+\section{UCT Player} 
+A escolha das ações realizadas pelo jogador é feita pelo algoritmo UCT. Como descrito antes, este algoritmo não precisa de uma heurística, no entanto há uma fase de análise na competição que é usada para fazer o maior número possível de simulações, para se obter uma média confiável dos bonus. Caso não haja tempo hábil para encontrar ao menos uma solução com retorno maior que zero, é provável que ela não seja encontrada durante o jogo. A implementação deste algoritmo é bem direta:
+
+
+\begin{pseudocode}{UCTSimulate}{state}
+\WHILE HAS\_TIME \DO
+\BEGIN
+	\WHILE \NOT TERMINAL(state) \DO
+		\BEGIN
+		VISIT(state)\\
+		legals \GETS LEGALS(state)\\
+	    unexplored \GETS UNEXPLORED(legals)\\
+		\IF unexplored
+		\THEN
+		\BEGIN
+			UCTSimulate(unexplored)
+		\END	
+		\ELSE
+		\BEGIN
+			next\_state \GETS BEST\_BONUS(state)\\
+			UCTSimulate(next\_state)\\
+		\END
+	\END
+\END
+\end{pseudocode}
+
+A constante da formúla $C_{p}\sqrt{\frac{2\ln n}{n_{j}}}$ tem que ser empiricamente ajustada. Testes mostraram que o valor 40 é razoável para a maioria dos jogos. Escolher um valor 0 (ignorar totalmente o bonus) ou 100, pode fazer a performance do jogador cair drasticamente.
+
+Como no inicio do jogo não há nenhum movimento explorado, o algoritmo será totalmente randômico. Depois de algumas simulações, as diferentes recompensas do estado inicial serão levadas em consideração e os movimentos seguintes novamente aleatórios. Com a exploração de um número maior de ações, o algoritmo passará a ser mais determinístico para a escolha do próximo estado.

@@ -28,7 +28,11 @@ onde $n_{j}$ é o número de vezes que a alavanca $j$ foi usada e $n$ o total de
 
 Ao aplicar UCB a jogos, o cenário sofre algumas alterações. No lugar de uma única máquina caça-níquel com alavancas independentes, cada alavanca da primeira máquina vai gerar uma outra máquina ou produzir uma recompensa. Isso corresponde a realizar um movimento no jogo e atingir novo estado ou uma recompensa de um estado final. Ainda sim é possível usar o algoritmo UCB para resolver o problema. O novo método é chamado UCT\cite{uct}, que significa UCB aplicado a árvores (UCB applied to Trees). 
 
-O algoritmo funciona como a estratégia de simualção de Monte Carlo, mas no lugar de escolher ações randômicas ele usa UCB em cada estado para explorar a recompensa que a ação proporcionará. 
+O algoritmo funciona como a estratégia de simualção de Monte Carlo, mas no lugar de escolher ações randômicas ele usa UCB em cada estado para explorar a recompensa que a ação proporcionará. Utilizando a média dos retornos, a fórmula para UCT é:
+\begin{equation}
+V(s) + C_{p}\sqrt{\frac{\ln N(s)}{N(s,a)}}
+\end{equation}
+A constante $C_{p}$ indica quanto o bônus será levado em consideração na escolha. $N(s)$ é o total de visitas ao estado $s$ durante as simulações e $N(s,a)$ o número de vezes em que a ação $a$ foi tomada.
 
 A grande vantagem do UCT é que ele não precisa de nenhuma heurística para dar um bom resultado, já que usa recompensas reais para estimar o valor dos movimentos. Também foi provado matematicamente que a probabilidade de escolher uma ação ótima converge para 1 quando o número de simulações cresce. 
 

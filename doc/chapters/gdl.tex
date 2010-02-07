@@ -57,7 +57,7 @@ As regras do jogo da velha permitem que um jogador marque uma célula apenas se 
 \begin{verbatim}                                                                                         
   (<= (legal ?player (mark ?x ?y))                                                                       
       (true (cell ?x ?y b))                                                                              
-      (true (control ?player)))                                                                          
+      (true (control ?player)))       
   (<= (legal xplayer noop)                                                                               
       (true (control oplayer)))                                                                          
   (<= (legal oplayer noop)                                                                               
