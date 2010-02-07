@@ -34,7 +34,9 @@ class UCTNode
   ## Insere mais um retorno na média 
   ##
   def append_return(simulated_return)
-    @returns = @returns + (1.0 / @visits)*(simulated_return - @returns)
+    unless simulated_return == 0 and @returns <= 0
+      @returns = @returns + (1.0 / @visits)*(simulated_return - @returns)
+    end
   end
 
   ##
@@ -52,7 +54,7 @@ class UCTNode
   end
   
   ## 
-  ## Guarda os pares de estado-ação
+  ## Guarda as ações possíveis
   ##
   def set_actions(legals)
     legals.each do |legal|
@@ -60,8 +62,8 @@ class UCTNode
     end
   end
 
-  ##
-  ## Atualiza a hash de uma ação
+  ## 
+  ## Guarda a hash do estado atingido de uma ação
   ##
   def set_state_action(action, state_hash)
     actions.each do |pair|

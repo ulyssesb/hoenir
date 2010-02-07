@@ -7,14 +7,15 @@ class UCTTree
   require 'uct_node'
 
   ## Limites de tempo para as simulações
-  WARMUP_LIMIT = 15
+  WARMUP_LIMIT = 720
   PLAY_LIMIT = 0.7
   
   attr_accessor :root
 
   @@prolog = ""
   @@states_hash = {}
-  
+  @@simulated_states = []
+
   def initialize(game_description, prolog_connector)
     # Interface GGP com o prolog
     @@prolog = PrologGGPInterface.new(prolog_connector, game_description)
@@ -85,51 +86,61 @@ class UCTTree
 
     # Simula enquanto tem tempo
     while not time_is_over
-      # Guarda o nó atual e uma lista dos que foram percorridos
-      current_node = @root
-      visited = []
-
-      # Desce a árvore até encontrar um nó terminal
-      while not @@prolog.is_terminal?(current_node.state)
-        # Visita o nó
-        current_node.look_up
-        visited << current_node.hash
-
-        # Primeira visita ao nó
-        if current_node.visits == 1
-          # Gera os filhos (movimentos legais)
-          legals = @@prolog.legals(current_node.state)
-          current_node.set_actions(legals)
-        end
-
-        # Busca a melhor ação
-        next_state = choose_simulated_action(current_node)
-        current_node = next_state
-
-        print "UCTTree::Simulate::Current State: "
-        puts current_node.state
-
-      end
+      # Limpa a lista das ações tomadas
+      @@simulated_states = []
+      
+      # Roda uma simulação do jogo. Guarda o último nó
+      last_node = simulate_single(@root)
       
       # Recompensa alcançada 
-      reward = @@prolog.reward(current_node.state).first
+      reward = @@prolog.reward(last_node.state).first
       
       print "UCTTree::Simulate::End of simulation. Reward: "
       puts reward
-      print "UCTTree::Simulate::End of simulation. State: "
-      puts current_node.state
-      
+#      print "UCTTree::Simulate::End of simulation. State: "
+#      puts last_node.state
+
       # Atribui o retorno para os nós do caminho percorrido
-      visited.each do |node_hash|
-        node = @@states_hash[node_hash]
+      @@simulated_states.each do |state_hash|
+        node = @@states_hash[state_hash]
         node.append_return(reward)
       end
     end
   end
 
+  ##
+  ## Simula um jogo inteiro
+  ##
+  def simulate_single(current_node)
+
+    # Desce a árvore até encontrar um nó terminal
+    while not @@prolog.is_terminal?(current_node.state)
+
+#      print "UCTTree::SimulateSingle::Current State: "
+#      puts current_node.state
+
+      # Visita o nó
+      current_node.look_up
+      @@simulated_states << current_node.hash    
+  
+      # Primeira visita ao nó
+      if current_node.visits == 1
+        # Gera os filhos (movimentos legais)
+        legals = @@prolog.legals(current_node.state)
+        current_node.set_actions(legals)
+      end
+
+      # Busca a melhor ação
+      next_state = choose_simulated_action(current_node)
+      current_node = next_state
+    end
+    
+    return current_node
+  end
+
   ## 
-  ## Busca a melhor ação para simulação. Caso ainda exista alguma que 
-  ## não tenha sido explorada, esta será retornada
+  ## Retorna um par ação/estado. Caso ainda exista alguma ação
+  ## não inexplorada, esta será retornada
   ## 
   def choose_simulated_action(node)
 
@@ -137,20 +148,26 @@ class UCTTree
     unexplored_action = unexplored(node)
     
     unless unexplored_action.nil?
+#      print "UCTTree::SimulatedAction:Unexplored Action : "
+#      puts unexplored_action
+
       # Cria um novo nó
       return create_node(node, unexplored_action)
     end
 
     best_bonus  = 0
     best_node = nil
+    best_action = nil
     node.actions.each do |pair|
       children = @@states_hash[pair[:state_hash]]
       bonus = children.bonus(node.visits)
       if bonus >= best_bonus
         best_bonus = bonus
         best_node = children
+        best_action = pair[:state_hash]
       end
     end
+
     return best_node
   end
 
@@ -159,11 +176,19 @@ class UCTTree
   ## 
   def unexplored(node)
     unexploreds = []
+
     node.actions.each do |pair|
-      unexploreds << pair[:action] if pair[:state_hash].nil? 
+      if not @@states_hash.has_key? pair[:state_hash]
+        unexploreds << pair[:action] 
+      end
     end
     
-    return unexploreds.choice
+    # Retorna nulo não houver ação inexplorada ou seleciona uma randomicamente
+    if unexploreds.empty?
+      return nil
+    else
+      return unexploreds.choice
+    end
   end
 
   ## 
@@ -175,10 +200,9 @@ class UCTTree
     
     # Gera um novo nó
     new_node = UCTNode.new(new_state)
-    @@states_hash[new_node.hash] = new_node
-    
-    # Guarda o nó
+
     current.set_state_action(unexplored_action, new_node.hash)
+    @@states_hash[new_node.hash] = new_node
     
     return new_node
   end
