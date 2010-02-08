@@ -42,7 +42,7 @@ Para sumarizar as jogadas legais em um determinado estado do jogo, o predicado \
 \end{enumerate}
  \doublespacing
 
-Por se tratar de uma linguagem deveriada da lógica de primeira ordem, as descrições em GDL podem ser transcritas para outras linguagem de mesma ascenção, como Prolog. O predicado \textit{legal} acima, por exemplo:
+Por se tratar de uma linguagem deverivada da lógica de primeira ordem, as descrições em GDL podem ser transcritas para outras linguagem de mesma ascensão, como Prolog. O predicado \textit{legal} acima, por exemplo:
 
 \begin{enumerate}
  	\singlespacing
@@ -63,7 +63,7 @@ As jogadas possíveis em um determinado estado são inferidas da base de conheci
 
  
  \section{Constituindo um novo estado}
- Os estados subsequêntes ao inicial, que é descrito pelo conjunto \textit{init}, são determinados após os jogadores realizarem seus movimentos, através da declaração \textit{does} que deve ser inserida na base de fatos. Seguindo o exemplo anterior, caso o jogador \textit{x} escolha a ação de marcar a célula (1, 1), o predicado \textit{does} referente a esta jogada será:
+ Os estados subsequentes ao inicial, que é descrito pelo conjunto \textit{init}, são determinados após os jogadores realizarem seus movimentos, através da declaração \textit{does} que deve ser inserida na base de fatos. Seguindo o exemplo anterior, caso o jogador \textit{x} escolha a ação de marcar a célula (1, 1), o predicado \textit{does} referente a esta jogada será:
 \begin{enumerate}
   	\singlespacing
   	\setcounter{enumi}{4}
@@ -74,7 +74,7 @@ As jogadas possíveis em um determinado estado são inferidas da base de conheci
 \end{enumerate}
  \doublespacing
 
-Em poder das ações tomadas por todos os jogadores na rodada atual, o próximo estado pode ser encontrado com auxílio do predicado abaixo. É importare relembrar que em todas as rodadas todos os jogadores realizam uma ação. Mesmo nos jogos onde há alternância de turnos, como o próprio jogo da velha, o oponente fica restrito a ação \textit{noop}.
+Em poder das ações tomadas por todos os jogadores na rodada atual, o próximo estado pode ser encontrado com auxílio do predicado abaixo. É importante relembrar que em todas as rodadas todos os jogadores realizam uma ação. Mesmo nos jogos onde há alternância de turnos, como o próprio jogo da velha, o oponente fica restrito a ação \textit{noop}.
 \begin{enumerate}
   	\singlespacing
   	\setcounter{enumi}{5}
